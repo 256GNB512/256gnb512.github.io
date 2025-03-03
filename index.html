@@ -1,30 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <meta name="description" content="A simple scrolling page with dynamically generated sections using JavaScript.">
+    <meta name="keywords" content="JavaScript, Fullscreen Sections, Scrolling">
+    <meta name="author" content="Your Name">
+    <title>Dynamic Fullscreen Sections</title>
     <style>
-        body {
-            font-size: 20px;
-            text-align: center;
+        body,
+        html {
             margin: 0;
             padding: 0;
+            scroll-behavior: smooth;
+            height: 100vh;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            display: flex;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100vw;
+            height: 8vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+        }
+
+        .header-buttons {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 4px;
+        }
+
+        .header-button {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            width: 500vw;
+        }
+
+        .section {
+            width: 100vw;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        @media only screen and (max-width: 600px) {
-            /* For mobile devices */
-            body {
-                font-size: 14px;
-            }
+            font-size: 2rem;
+            font-family: Arial, sans-serif;
+            color: white;
+            scroll-snap-align: center;
         }
     </style>
 </head>
+
 <body>
-    <h1>Hello, World!</h1>
+    <div class="header">
+        <div class="header-buttons">
+            <button class="header-button" onclick="window.open('about:blank', '_blank');"></button>
+            <button class="header-button" onclick="window.open('about:blank', '_blank');"></button>
+        </div>
+        kamilla.arte
+    </div>
+    <div class="container" id="container"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const colors = ["#FF5733", "#33FF57", "#3357FF", "#F1C40F", "#8E44AD"];
+            const container = document.getElementById("container");
+            colors.forEach((color, index) => {
+                const div = document.createElement("div");
+                div.className = "section";
+                div.style.backgroundColor = color;
+                div.textContent = `Section ${index + 1}`;
+                container.appendChild(div);
+            });
+        });
+    </script>
 </body>
+
 </html>
