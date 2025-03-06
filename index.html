@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centered Div with Absolute Child</title>
+    <script>
+        // Function to generate a random color
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function makeClickable(element) {
+            if (element instanceof HTMLElement) {
+                element.addEventListener("click", () => {
+                    console.log("Element clicked!");
+                });
+            } else {
+                console.error("Provided argument is not a valid DOM element.");
+            }
+        }
+
+
+        function designateIdToDom(domElement, id) {
+            if (!domElement || !id) {
+                console.error('Invalid DOM element or ID provided.');
+                return;
+            }
+
+            // Check if the ID is already in use
+            if (document.getElementById(id)) {
+                console.warn(`An element with the ID "${id}" already exists. IDs must be unique.`);
+                return;
+            }
+
+            // Assign the ID to the DOM element
+            domElement.id = id;
+            console.log(`ID "${id}" assigned to the DOM element.`);
+        }
+
+        function designateTagToDom(domElement, tagName) 
+        {
+            if (!domElement || !tagName) {
+                console.error('Invalid DOM element or tag name provided.');
+                return null;
+            }
+
+            // Create a new element with the specified tag
+            const newElement = document.createElement(tagName);
+
+            // Copy all attributes from the old element to the new element
+            for (const attr of domElement.attributes) {
+                newElement.setAttribute(attr.name, attr.value);
+            }
+
+            // Copy all child nodes from the old element to the new element
+            while (domElement.firstChild) {
+                newElement.appendChild(domElement.firstChild);
+            }
+
+            // Replace the old element with the new element in the DOM
+            domElement.replaceWith(newElement);
+
+            console.log(`Tag of the DOM element changed to "${tagName}".`);
+            return newElement;
+        }
+        function startUpdateLoop(updateFunction) {
+            let isRunning = true; // Control variable to start/stop the loop
+
+            // Define the loop function
+            function loop(timestamp) {
+                if (!isRunning) return; // Stop the loop if isRunning is false
+
+                // Call the update function
+                updateFunction(timestamp);
+
+                // Request the next frame
+                requestAnimationFrame(loop);
+            }
+
+            // Start the loop
+            requestAnimationFrame(loop);
+
+            // Return a function to stop the loop
+            return () => {
+                isRunning = false;
+            };
+        }
+        function addSquaresToDom(parentDom, width) {
+            // Ensure the parent DOM has a defined position (relative, absolute, or fixed)
+            //parentDom.style.position = 'relative';
+
+            // Create the left square
+            const leftSquare = document.createElement('div');
+            leftSquare.style.width = `${width}px`;
+            leftSquare.style.height = `${width}px`;
+            leftSquare.style.backgroundColor = 'red'; // Just for visibility
+            leftSquare.style.position = 'absolute';
+            leftSquare.style.left = '0';
+            leftSquare.style.top = '50%';
+            leftSquare.style.transform = 'translateY(-50%)';
+            leftSquare.style.transformOrigin = '0 50%'; // Anchor point at (0, 0.5)
+
+            // Create the right square
+            const rightSquare = document.createElement('div');
+            rightSquare.style.width = `${width}px`;
+            rightSquare.style.height = `${width}px`;
+            rightSquare.style.backgroundColor = 'blue'; // Just for visibility
+            rightSquare.style.position = 'absolute';
+            rightSquare.style.right = '0';
+            rightSquare.style.top = '50%';
+            rightSquare.style.transform = 'translateY(-50%)';
+            rightSquare.style.transformOrigin = '100% 50%'; // Anchor point at (1, 0.5)
+
+            // Append the squares to the parent DOM
+            parentDom.appendChild(leftSquare);
+            parentDom.appendChild(rightSquare);
+        }
+
+                // Function to create a centered container
+        function createCenteredContainer(height, width) {
+            // Create the container
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.justifyContent = 'center';
+            container.style.alignItems = 'center';
+            container.style.height = height;
+            container.style.width = width;
+            container.style.backgroundColor = getRandomColor(); // Random color
+            container.style.fontFamily = 'Arial, sans-serif';
+            container.style.boxSizing = 'border-box'; // Ensure padding/borders don't affect dimensions
+            container.style.position = 'relative'; // Make the container a positioning context
+
+
+            // Return the container (without text)
+            return container;
+        }
+
+        // Function to add a 100x100 pixel child element to a parent DOM object
+        function addChildElement(
+            parent,
+            width,
+            height,
+            horPos,
+            verPos,
+            anchorPoint
+        ) {
+            // Create the child element
+            const child = document.createElement('div');
+            child.style.width = width;
+            child.style.height = height;
+            child.style.backgroundColor = getRandomColor(); // Random color
+            child.style.border = '2px solid black'; // Add a border for visibility
+            child.style.display = 'flex';
+            child.style.justifyContent = 'center';
+            child.style.alignItems = 'center';
+            child.textContent = 'Child'; // Add some text
+
+            // Position the child absolutely within the parent
+            child.style.position = 'absolute';
+            child.style.top = verPos; // Position at half the height of the parent
+            child.style.left = horPos; // Position at half the width of the parent
+            child.style.transform = anchorPoint; // Center the child
+
+            // Append the child to the parent
+            parent.appendChild(child);
+            return child;
+        }
+
+        // Function to initialize the page
+        function initializePage() {
+            // Reset default styles for body and html
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.body.style.overflow = 'hidden'; // Prevent scrollbars
+            document.documentElement.style.height = '100%'; // Ensure html takes full height
+
+            // Create the centered container
+            const centeredContainer = createCenteredContainer('100vh', '100vw');
+
+            // Add the container to the body
+            document.body.appendChild(centeredContainer);
+
+            // Assign text to the container after creation
+            const textElement = document.createElement('h1');
+            textElement.textContent = 'Hello, World!';
+            textElement.style.color = '#333'; // Text color
+            centeredContainer.appendChild(textElement);
+
+            // Add a 100x100 pixel child element to the centered container
+            const childEl = addChildElement(
+                centeredContainer,
+                '10%', '10%',
+                '50%', '50%',
+                'translate(-50%, -50%)'
+            );
+
+
+            addSquaresToDom(childEl, 50); // Replace 50 with your desired width
+
+            makeClickable(childEl);
+        }
+
+        // Run the initializePage function when the page loads
+        window.onload = initializePage;
+    </script>
+</head>
+
+<body>
+    <!-- Everything will be created by JavaScript -->
+</body>
+
+</html>
