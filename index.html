@@ -19,7 +19,7 @@
         function makeClickable(element) {
             if (element instanceof HTMLElement) {
                 element.addEventListener("click", () => {
-                    console.log("Element clicked!");
+                    console.log("Element " + element.id + " clicked!");
                 });
             } else {
                 console.error("Provided argument is not a valid DOM element.");
@@ -41,7 +41,7 @@
 
             // Assign the ID to the DOM element
             domElement.id = id;
-            console.log(`ID "${id}" assigned to the DOM element.`);
+            //console.log(`ID "${id}" assigned to the DOM element.`);
         }
 
         function designateTagToDom(domElement, tagName) 
@@ -67,9 +67,10 @@
             // Replace the old element with the new element in the DOM
             domElement.replaceWith(newElement);
 
-            console.log(`Tag of the DOM element changed to "${tagName}".`);
+            //console.log(`Tag of the DOM element changed to "${tagName}".`);
             return newElement;
         }
+
         function startUpdateLoop(updateFunction) {
             let isRunning = true; // Control variable to start/stop the loop
 
@@ -92,6 +93,7 @@
                 isRunning = false;
             };
         }
+
         function setImageAsTexture(domElement, imagePath) {
             // Create an image element
             const img = new Image();
@@ -105,7 +107,7 @@
                 domElement.style.backgroundImage = `url('${imagePath}')`;
 
                 // Ensure the image scales proportionally based on the div's width
-                domElement.style.backgroundSize = '100% auto';
+                domElement.style.backgroundSize = 'cover';
 
                 // Center the image both horizontally and vertically
                 domElement.style.backgroundPosition = 'center';
@@ -119,27 +121,6 @@
                 domElement.style.height = `${divWidth * aspectRatio}px`; // Set height based on aspect ratio
             };
         }
-        function flipDivBackgroundHorizontally(divElement) {
-            // Ensure the div is positioned and has overflow hidden
-            divElement.style.position = 'relative';
-            divElement.style.overflow = 'hidden';
-
-            // Create a pseudo-element for the flipped background
-            const pseudoElement = document.createElement('div');
-            pseudoElement.style.content = '""';
-            pseudoElement.style.position = 'absolute';
-            pseudoElement.style.top = '0';
-            pseudoElement.style.left = '0';
-            pseudoElement.style.width = '100%';
-            pseudoElement.style.height = '100%';
-            pseudoElement.style.backgroundImage = divElement.style.backgroundImage; // Copy the background image
-            pseudoElement.style.backgroundSize = divElement.style.backgroundSize; // Copy the background size
-            pseudoElement.style.transform = 'scaleX(-1)'; // Flip the pseudo-element horizontally
-            pseudoElement.style.zIndex = '-1'; // Place it behind the content
-
-            // Append the pseudo-element to the div
-            divElement.appendChild(pseudoElement);
-        }
         function addCenteredSquare(parentDiv, squareWidth, invertHorizontally) {
             // Ensure the parent div has a defined height and is a positioned element
             /*if (!parentDiv.style.height) {
@@ -151,23 +132,50 @@
             const square = document.createElement('div');
             square.style.width = `${squareWidth}px`; // Set width
             square.style.height = `${squareWidth}px`; // Set height (same as width for a square)
-            square.style.backgroundColor = 'green'; // Just for visibility
+            square.style.backgroundColor = 'purple'; // Just for visibility
             square.style.position = 'absolute'; // Position absolutely within the parent
             square.style.top = '50%'; // Position from the top
             square.style.left = '0%'; // Position from the left
             square.style.transform = 'translate(0%, -50%)'; // Center the square
             square.style.transformOrigin = 'center center'; // Ensure proper centering
 
-            //square.style.transform = 'scaleX(-1)';
-            setImageAsTexture(square, "arrow.png");
 
-            flipDivBackgroundHorizontally(square);
+            //square.style.transform = 'scaleX(-1)';
+            //setImageAsTexture(square, "arrow.png");
+
             // Append the square to the parent div
             parentDiv.appendChild(square);
             return square;
         }
         
-        function addRectanglesToDiv(parentDiv, rect1Width) {
+
+        function addImageToDiv(parentDiv, imagePath, horFlip = true) {
+            // Ensure the parent div is positioned and has overflow hidden
+            parentDiv.style.position = 'relative';
+            parentDiv.style.overflow = 'hidden';
+
+            // Create a pseudo-element for the flipped image
+            const pseudoElement = document.createElement('div');
+            pseudoElement.style.content = '""';
+            pseudoElement.style.position = 'absolute';
+            pseudoElement.style.top = '0';
+            pseudoElement.style.left = '0';
+            pseudoElement.style.width = '100%';
+            pseudoElement.style.height = '100%';
+            pseudoElement.style.backgroundImage = `url('${imagePath}')`; // Set the image from the input path
+            pseudoElement.style.backgroundSize = 'cover'; // Ensure the image covers the pseudo-element
+            if(horFlip)
+            {
+                pseudoElement.style.transform = 'scaleX(-1)'; // Flip the image horizontally
+            }
+            pseudoElement.style.zIndex = '-1'; // Place it behind the content
+
+            // Append the pseudo-element to the parent div
+            parentDiv.appendChild(pseudoElement);
+            return pseudoElement;
+        }
+
+        function addCarouselArrows(parentDiv, rect1Width) {
             // Ensure the parent div has a defined height
             if (!parentDiv.style.height) {
                 parentDiv.style.height = '100%'; // Default to full height if not set
@@ -185,7 +193,11 @@
             rect1.style.transform = 'translateY(-50%)';
             rect1.style.transformOrigin = '0 50%'; // Anchor point at (0, 0.5)
             designateTagToDom(rect1, "carouselBtn");
+
             const newSquare1 = addCenteredSquare(rect1, rect1Width, true);
+            const leftArrow = addImageToDiv(newSquare1, "arrow.png");
+            designateIdToDom(rect1, 'carouselLftClickArea');
+            designateIdToDom(leftArrow, 'carouselLftArrow');
 
             // Create the second rectangle
             const rect2 = document.createElement('div');
@@ -200,45 +212,22 @@
             rect2.style.transformOrigin = '100% 50%'; // Anchor point at (1, 0.5)
             designateTagToDom(rect2, "carouselBtn");
             const newSquare2 = addCenteredSquare(rect2, rect1Width, false);
+            const rightArrow = addImageToDiv(newSquare2, "arrow.png", false);
+            designateIdToDom(rect2, 'carouselRgtClickArea');
+            designateIdToDom(rightArrow, 'carouselRgtArrow');
+
+
+
+
+            makeClickable(rect1);
+            makeClickable(rect2);
 
             // Append the rectangles to the parent div
             parentDiv.appendChild(rect1);
             parentDiv.appendChild(rect2);
         }
-        function addSquaresToDom(parentDom, width) {
-            // Ensure the parent DOM has a defined position (relative, absolute, or fixed)
-            //parentDom.style.position = 'relative';
-
-            // Create the left square
-            const leftSquare = document.createElement('div');
-            parentDom.appendChild(leftSquare);
-            leftSquare.style.width = `${width}px`;
-            leftSquare.style.height = '100px';///`${width}px`;
-            leftSquare.style.backgroundColor = 'red'; // Just for visibility
-            leftSquare.style.position = 'absolute';
-            leftSquare.style.left = '0';
-            leftSquare.style.top = '50%';
-            leftSquare.style.transform = 'translateY(-50%)';
-            leftSquare.style.transformOrigin = '0 50%'; // Anchor point at (0, 0.5)
-            setImageAsTexture(leftSquare, "arrow.png");
-
-            // Create the right square
-            const rightSquare = document.createElement('div');
-            parentDom.appendChild(rightSquare);
-            rightSquare.style.width = `${width}px`;
-            rightSquare.style.height = `${width}px`;
-            rightSquare.style.backgroundColor = 'blue'; // Just for visibility
-            rightSquare.style.position = 'absolute';
-            rightSquare.style.right = '0';
-            rightSquare.style.top = '50%';
-            rightSquare.style.transform = 'translateY(-50%)';
-            rightSquare.style.transformOrigin = '100% 50%'; // Anchor point at (1, 0.5)
-
-            // Append the squares to the parent DOM
-        }
-
                 // Function to create a centered container
-        function createCenteredContainer(height, width) {
+        function createMainWindow(height, width) {
             // Create the container
             const container = document.createElement('div');
             container.style.display = 'flex';
@@ -296,28 +285,27 @@
             document.documentElement.style.height = '100%'; // Ensure html takes full height
 
             // Create the centered container
-            const centeredContainer = createCenteredContainer('100vh', '100vw');
+            const mainWindow = createMainWindow('100vh', '100vw');
 
             // Add the container to the body
-            document.body.appendChild(centeredContainer);
+            document.body.appendChild(mainWindow);
 
             // Assign text to the container after creation
-            const textElement = document.createElement('h1');
-            textElement.textContent = 'Hello, World!';
-            textElement.style.color = '#333'; // Text color
-            centeredContainer.appendChild(textElement);
+            //const textElement = document.createElement('h1');
+            //textElement.textContent = 'Hello, World!';
+            //textElement.style.color = '#333'; // Text color
+            //mainWindow.appendChild(textElement);
 
             // Add a 100x100 pixel child element to the centered container
-            const childEl = addChildElement(
-                centeredContainer,
+            const carousel = addChildElement(
+                mainWindow,
                 '10%', '30%',
                 '50%', '50%',
                 'translate(-50%, -50%)'
             );
 
 
-            addRectanglesToDiv(childEl, 50); // Replace 50 with your desired width
-            makeClickable(childEl);
+            addCarouselArrows(carousel, 50); // Replace 50 with your desired width
         }
 
         // Run the initializePage function when the page loads
