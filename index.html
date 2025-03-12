@@ -183,6 +183,38 @@ function addArrowSkipperGraphic(parentDiv, imagePath, horFlip = true) {
     return pseudoElement;
 }
 
+function setupScrollListeners(
+    onWheel = () => {}, 
+    onTouchMove = () => {}, 
+    onArrowKey = () => {}
+) {
+    document.addEventListener('wheel', (event) => {
+        onWheel(event.deltaX, event.deltaY);
+    });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (event) => {
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    });
+
+    document.addEventListener('touchmove', (event) => {
+        let touchEndX = event.touches[0].clientX;
+        let touchEndY = event.touches[0].clientY;
+        let deltaX = touchStartX - touchEndX;
+        let deltaY = touchStartY - touchEndY;
+        onTouchMove(deltaX, deltaY);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+            onArrowKey(event.key);
+        }
+    });
+}
+
 function addCarouselArrows(parentDiv, rect1Width) {
     // Ensure the parent div has a defined height
     if (!parentDiv.style.height) {
@@ -267,6 +299,10 @@ function loadImage(path) {
   return img;
 }
 
+function sortAlphabeticallyCaseInsensitive(arr) {
+    return arr.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+}
+
 // Function to add a 100x100 pixel child element to a parent DOM object
 function addChildElement(parent,
     width,
@@ -336,6 +372,41 @@ function assignImageToDiv(imagePath, divElement) {
   };
 }
 
+function lerp(start, end, t) {
+    return start + (end - start) * t;
+}
+const animation_speed = 0.02;
+let animations_vector_current = [0, 0, 0, 0];
+let animations_targets = [0, 0, 0, 0];
+let carousel;
+
+function continuousUpdate() {
+    if(carousel != undefined)
+    {
+        for(let i = 0; i < 4; i++){
+            if(animations_vector_current[i] != animations_targets[i]){
+                
+                console.log(animations_targets[0] + ' ' + animations_vector_current[0]);
+                animations_vector_current[i] = lerp(animations_vector_current[i], animations_targets[i], animation_speed);
+                if(Math.abs(+ Math.abs(animations_targets[i] - animations_vector_current[i])  < 0.01))
+                {
+                    animations_vector_current[i] = animations_targets[i];
+                }
+            }
+        }
+
+        carousel.style.transform = 'translate(' + -50 + '%, ' + -( 50 + animations_vector_current[0])  + '%)';
+        //let carouselRect = carousel.getBoundingClientRect();
+        //console.log(carouselRect.width);
+    }
+    // Call the function again on the next frame
+    requestAnimationFrame(continuousUpdate);
+}
+
+
+
+// Start the loop
+continuousUpdate();
 // Function to initialize the page
 function mainFunction() {
     // Reset default styles for body and html
@@ -345,84 +416,90 @@ function mainFunction() {
     document.documentElement.style.height = '100%'; // Ensure html takes full height
 
     // Create the centered container
-    const mainWindow = createMainWindow('100vh', '100vw');
+    const main_window = createMainWindow('100vh', '100vw');
 
     // Add the container to the body
-    document.body.appendChild(mainWindow);
+    document.body.appendChild(main_window);
 
 
 
     // Add a 100x100 pixel child element to the centered container
-    const carousel = addChildElement(
-        mainWindow,
-        '90%', '90%',
+    carousel = addChildElement(
+        main_window,
+        '100%', '100%',
         '50%', '50%',
         'translate(-50%, -50%)'
     );
 
-    const carouselFrameA = addChildElement(
+
+    const carousel_frame_a = addChildElement(
         carousel,
         '25%', '100%',
         '25%', '50%',
         'translate(-50%, -50%)'
     );
 
-    const carouselFrameB = addChildElement(
+    const carousel_frame_b = addChildElement(
         carousel,
         '25%', '100%',
         '50%', '50%',
         'translate(-50%, -50%)'
     );
 
-    const carouselFrameC = addChildElement(
+    const carousel_frame_c = addChildElement(
         carousel,
         '25%', '100%',
         '75%', '50%',
         'translate(-50%, -50%)'
     );
     const imgPaths = generateImagePaths(10);
-    /*for(let i = 0; i < imgPaths.length; i++){
-        checkIfImgExists( imgPaths[i], (img) => 
-        {
-            if(img)
-            {
-                console.log(imgPaths[i]);
-                validImages.push(imgPaths[i]);
-            }
-        });
-    }*/
+
+
 
     loadAllImages(imgPaths, loadedImages => {
         //console.log('all images: ', loadedImages);
         console.log(validImages[0]);
-        setImageAsTexture(carouselFrameB, validImages[0] );
+        console.log(validImages);
+        validImages = sortAlphabeticallyCaseInsensitive(validImages);
+        console.log(validImages);
+        setImageAsTexture(carousel_frame_b, validImages[0] );
+        setImageAsTexture(carousel_frame_a, validImages[validImages.length - 1] );
+        setImageAsTexture(carousel_frame_c, validImages[1] );
 
-        setImageAsTexture(carouselFrameA, validImages[validImages.length - 1] );
-
-        setImageAsTexture(carouselFrameC, validImages[1] );
-
-
+        continuousUpdate();
     });
 
-    //console.log(validImages);
+    arrowKeyPressed = function(key){
+        if (key == 'ArrowUp') {
+            animations_targets[0] = 100;
+            console.log('up');
+        }        
+        if (key == 'ArrowDown') {
+            animations_targets[0] = 0;
+        }
+    }
 
-    //addArrowSkipperGraphic(carouselFrameB, validImages[0]);
+    scrollAndTouch = function(dx, dy){
+        if(dy < 5){
+            animations_targets[0] = 100;
+        } 
+        else if(dy > 5){
+            animations_targets[0] = 0;
+        }
+    }
+
+
+    setupScrollListeners(
+        (dx, dy) => scrollAndTouch(dx, dy),
+        (dx, dy) => scrollAndTouch(dx, dy),
+        (key) => arrowKeyPressed(key)
+    );
+
+
 
     addCarouselArrows(carousel, 50); // Replace 50 with your desired width
 }
 
-
-/*// Usage
-checkIfImgExists('path/to/image.jpg', (img) => {
-  if (img) {
-    console.log('Image found:', img);
-    document.body.appendChild(img); // Add the image to the page
-  } else {
-    console.log('Image not found');
-  }
-});*/
-
-// Run the mainFunction function when the page loads
 window.onload = mainFunction;
 
 </script>
