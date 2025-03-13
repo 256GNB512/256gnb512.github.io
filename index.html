@@ -9,6 +9,13 @@
 
 <script>
 
+const animation_speed = 0.02;
+const scrollSnap = 16;
+let animations_vector_current = [0, 0, 0, 0];
+let animations_targets = [0, 0, 0, 0];
+let carousel;
+
+
 function getRandomColor() {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -375,10 +382,7 @@ function assignImageToDiv(imagePath, divElement) {
 function lerp(start, end, t) {
     return start + (end - start) * t;
 }
-const animation_speed = 0.02;
-let animations_vector_current = [0, 0, 0, 0];
-let animations_targets = [0, 0, 0, 0];
-let carousel;
+
 
 function continuousUpdate() {
     if(carousel != undefined)
@@ -479,19 +483,23 @@ function mainFunction() {
         }
     }
 
-    scrollAndTouch = function(dx, dy){
+    scrolling = function(dx, dy){
         if(dy < 5){
-            animations_targets[0] = 100;
         } 
         else if(dy > 5){
-            animations_targets[0] = 0;
         }
     }
 
+    touching = function(dx, dy){
+        if(dy < 5){
+        } 
+        else if(dy > 5){
+        }
+    }
 
     setupScrollListeners(
-        (dx, dy) => scrollAndTouch(dx, dy),
-        (dx, dy) => scrollAndTouch(dx, dy),
+        (dx, dy) => scrolling(dx, dy),
+        (dx, dy) => touching(dx, dy),
         (key) => arrowKeyPressed(key)
     );
 
