@@ -150,7 +150,7 @@ function addCenteredSquare(parentDiv, squareWidth, invertHorizontally) {
     const square = document.createElement('div');
     square.style.width = `${squareWidth}px`; // Set width
     square.style.height = `${squareWidth}px`; // Set height (same as width for a square)
-    square.style.backgroundColor = 'purple'; // Just for visibility
+    //square.style.backgroundColor = 'purple'; // Just for visibility
     square.style.position = 'absolute'; // Position absolutely within the parent
     square.style.top = '50%'; // Position from the top
     square.style.left = '0%'; // Position from the left
@@ -245,7 +245,7 @@ function addCarouselArrows(parentDiv, rect1Width) {
     const rect1 = document.createElement('div');
     rect1.style.width = `${rect1Width}px`; // Set width
     rect1.style.height = '100%'; // Inherit height from parent
-    rect1.style.backgroundColor = 'red'; // Just for visibility
+    //rect1.style.backgroundColor = 'red'; // Just for visibility
     rect1.style.display = 'inline-block'; // Display rectangles side by side
     rect1.style.position = 'absolute';
     rect1.style.left = '0';
@@ -263,7 +263,7 @@ function addCarouselArrows(parentDiv, rect1Width) {
     const rect2 = document.createElement('div');
     rect2.style.width = `${rect1Width}px`; // Set width
     rect2.style.height = '100%'; // Inherit height from parent
-    rect2.style.backgroundColor = 'blue'; // Just for visibility
+    //rect2.style.backgroundColor = 'blue'; // Just for visibility
     rect2.style.display = 'inline-block'; // Display rectangles side by side
     rect2.style.position = 'absolute';
     rect2.style.right = '0';
@@ -464,34 +464,37 @@ function mainFunction() {
 
     const carousel_frame_a = addChildElement(
         carousel,
-        '25%', '100%',
-        '25%', '50%',
+        '100%', '100%',
+        '50%', '50%',
         'translate(-50%, -50%)'
     );
 
     const carousel_frame_b = addChildElement(
         carousel,
-        '25%', '100%',
+        '100%', '100%',
         '50%', '50%',
         'translate(-50%, -50%)'
     );
 
     const carousel_frame_c = addChildElement(
         carousel,
-        '25%', '100%',
-        '75%', '50%',
+        '100%', '100%',
+        '50%', '50%',
         'translate(-50%, -50%)'
     );
-    const imgPaths = generateImagePaths(10);
+    /*
+    const carousel_frame_d = addChildElement(
+        carousel,
+        '20%', '100%',
+        '80%', '50%',
+        'translate(-50%, -50%)'
+    );*/
+    const imgPaths = generateImagePaths(100);
 
 
 
     loadAllImages(imgPaths, loadedImages => {
-        //console.log('all images: ', loadedImages);
-        //console.log(validImages[0]);
-        //console.log(validImages);
         validImages = sortAlphabeticallyCaseInsensitive(validImages);
-        //console.log(validImages);
         setImageAsTexture(carousel_frame_b, validImages[0]);
         setImageAsTexture(carousel_frame_a, validImages[validImages.length - 1]);
         setImageAsTexture(carousel_frame_c, validImages[1]);
