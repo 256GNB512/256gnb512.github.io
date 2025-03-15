@@ -517,8 +517,8 @@
             }
 
             setupScrollListeners(
-                (dx, dy) => scrolling(dx, dy),
-                (dx, dy) => touching(dx, dy * -1),
+                (dx, dy) => scrolling(dx, dy * -1),
+                (dx, dy) => touching(dx, dy),
                 (key) => arrowKeyPressed(key)
             );
 
