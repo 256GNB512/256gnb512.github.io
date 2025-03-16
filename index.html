@@ -6,41 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centered Div with Absolute Child</title>
 
+    <script src="divsLib.js"></script>
+    <script src="varietyLib.js"></script>
 
     <script>
 
+
 const animation_speed = 0.02;
-const scrollSnapDistance = 10;
 const scheduledActions = [];
 
-let animations_vector_current = [0, 0, 0, 0];
-let animations_vector_targets = [0, 0, 0, 0];
+let animations_current = [0, 0, 0, 0];
+let animations_targets = [0, 0, 0, 0];
 let carousel;
-let scrollSnapController = 0;
+let scroll_snap_controller = 0;
+let valid_images = [];
+let is_carousel_at_top = false;
+let carousel_frame_a;
+let carousel_frame_b;
 
 
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-function generateImagePaths(length) {
-    const paths = [];
-    for (let i = 0; i < length; i++) {
-        paths.push('imgs/' + `img (${String(i)}).jpg`);
-    }
-    return paths;
-}
 
 
-function makeClickable(element) {
+function makeClickable(element, inputFunction) 
+{
     if (element instanceof HTMLElement) {
         element.addEventListener("click", () => {
-            console.log("Element " + element.id + " clicked!");
+            inputFunction();
+            //console.log("Element " + element.id + " clicked!");
         });
     } else {
         console.error("Provided argument is not a valid DOM element.");
@@ -48,50 +40,10 @@ function makeClickable(element) {
 }
 
 
-function designateIdToDom(domElement, id) {
-    if (!domElement || !id) {
-        console.error('Invalid DOM element or ID provided.');
-        return;
-    }
 
-    // Check if the ID is already in use
-    if (document.getElementById(id)) {
-        console.warn(`An element with the ID "${id}" already exists. IDs must be unique.`);
-        return;
-    }
 
-    // Assign the ID to the DOM element
-    domElement.id = id;
-    //console.log(`ID "${id}" assigned to the DOM element.`);
-}
-
-function designateTagToDom(domElement, tagName) {
-    if (!domElement || !tagName) {
-        console.error('Invalid DOM element or tag name provided.');
-        return null;
-    }
-
-    // Create a new element with the specified tag
-    const newElement = document.createElement(tagName);
-
-    // Copy all attributes from the old element to the new element
-    for (const attr of domElement.attributes) {
-        newElement.setAttribute(attr.name, attr.value);
-    }
-
-    // Copy all child nodes from the old element to the new element
-    while (domElement.firstChild) {
-        newElement.appendChild(domElement.firstChild);
-    }
-
-    // Replace the old element with the new element in the DOM
-    domElement.replaceWith(newElement);
-
-    //console.log(`Tag of the DOM element changed to "${tagName}".`);
-    return newElement;
-}
-
-function startUpdateLoop(updateFunction) {
+function startUpdateLoop(updateFunction) 
+{
     let isRunning = true; // Control variable to start/stop the loop
 
     // Define the loop function
@@ -114,59 +66,11 @@ function startUpdateLoop(updateFunction) {
     };
 }
 
-function setImageAsTexture(domElement, imagePath) {
-    // Create an image element
-    const img = new Image();
-
-    // Set the image source
-    img.src = imagePath;
-
-    // Set the image as the background of the div
-    domElement.style.backgroundImage = `url('${imagePath}')`;
-
-    // Ensure the image scales proportionally based on the div's width
-    domElement.style.backgroundSize = 'cover';
-
-    // Center the image both horizontally and vertically
-    domElement.style.backgroundPosition = 'center';
-
-    // Prevent the image from repeating
-    domElement.style.backgroundRepeat = 'no-repeat';
-
-    // Optionally, set the height of the div to match the image's aspect ratio
-    //const aspectRatio = img.height / img.width;
-    //const divWidth = domElement.clientWidth; // Get the current width of the div
-    //domElement.style.height = `${divWidth * aspectRatio}px`; // Set height based on aspect ratio
-}
-
-function addCenteredSquare(parentDiv, squareWidth, invertHorizontally) {
-    // Ensure the parent div has a defined height and is a positioned element
-    /*if (!parentDiv.style.height) {
-        parentDiv.style.height = '100%'; // Default to full height if not set
-    }
-    parentDiv.style.position = 'relative'; // Make the parent a positioned element*/
-
-    // Create the square child div
-    const square = document.createElement('div');
-    square.style.width = `${squareWidth}px`; // Set width
-    square.style.height = `${squareWidth}px`; // Set height (same as width for a square)
-    //square.style.backgroundColor = 'purple'; // Just for visibility
-    square.style.position = 'absolute'; // Position absolutely within the parent
-    square.style.top = '50%'; // Position from the top
-    square.style.left = '0%'; // Position from the left
-    square.style.transform = 'translate(0%, -50%)'; // Center the square
-    square.style.transformOrigin = 'center center'; // Ensure proper centering
 
 
-    //square.style.transform = 'scaleX(-1)';
-    //setImageAsTexture(square, "arrow.png");
 
-    // Append the square to the parent div
-    parentDiv.appendChild(square);
-    return square;
-}
-
-function addArrowSkipperGraphic(parentDiv, imagePath, horFlip = true) {
+function addArrowSkipperGraphic(parentDiv, imagePath, horFlip = true) 
+{
     // Ensure the parent div is positioned and has overflow hidden
     parentDiv.style.position = 'relative';
     parentDiv.style.overflow = 'hidden';
@@ -197,7 +101,8 @@ function setupScrollListeners(
     onTouchMove = () => { },
     onTouchStart = () => { },
     onTouchEnd = () => { }
-) {
+) 
+{
     document.addEventListener('wheel', (event) => {
         onWheel(event.deltaX, event.deltaY);
     });
@@ -235,7 +140,8 @@ function setupScrollListeners(
     });
 }
 
-function addCarouselArrows(parentDiv, rect1Width) {
+function addCarouselArrows(parentDiv, rect1Width) 
+{
     // Ensure the parent div has a defined height
     if (!parentDiv.style.height) {
         parentDiv.style.height = '100%'; // Default to full height if not set
@@ -252,7 +158,7 @@ function addCarouselArrows(parentDiv, rect1Width) {
     rect1.style.top = '50%';
     rect1.style.transform = 'translateY(-50%)';
     rect1.style.transformOrigin = '0 50%'; // Anchor point at (0, 0.5)
-    designateTagToDom(rect1, "carouselBtn");
+    designateTagToDom(rect1, "carouselBtnL");
 
     const newSquare1 = addCenteredSquare(rect1, rect1Width, true);
     const leftArrow = addArrowSkipperGraphic(newSquare1, "arrow.png");
@@ -270,7 +176,7 @@ function addCarouselArrows(parentDiv, rect1Width) {
     rect2.style.top = '50%';
     rect2.style.transform = 'translateY(-50%)';
     rect2.style.transformOrigin = '100% 50%'; // Anchor point at (1, 0.5)
-    designateTagToDom(rect2, "carouselBtn");
+    designateTagToDom(rect2, "carouselBtnR");
     const newSquare2 = addCenteredSquare(rect2, rect1Width, false);
     const rightArrow = addArrowSkipperGraphic(newSquare2, "arrow.png", false);
     designateIdToDom(rect2, 'carouselRgtClickArea');
@@ -279,15 +185,16 @@ function addCarouselArrows(parentDiv, rect1Width) {
 
 
 
-    makeClickable(rect1);
-    makeClickable(rect2);
+    makeClickable(rect1, previousCarouselImage);
+    makeClickable(rect2, nextCarouselImage);
 
     // Append the rectangles to the parent div
     parentDiv.appendChild(rect1);
     parentDiv.appendChild(rect2);
 }
 // Function to create a centered container
-function createMainWindow(height, width) {
+function createMainWindow(height, width) 
+{
     // Create the container
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -300,145 +207,153 @@ function createMainWindow(height, width) {
     container.style.boxSizing = 'border-box'; // Ensure padding/borders don't affect dimensions
     container.style.position = 'relative'; // Make the container a positioning context
 
+    designateIdToDom(container, 'mainWindow');
+
 
     // Return the container (without text)
     return container;
 }
 
 
-function loadImage(path) {
-    const img = new Image();
-    img.src = path;
-    return img;
-}
-
-function sortAlphabeticallyCaseInsensitive(arr) {
-    return arr.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-}
-
 // Function to add a 100x100 pixel child element to a parent DOM object
-function addChildElement(parent,
-    width,
-    height,
-    horPos,
-    verPos,
-    anchorPoint) {
-    // Create the child element
-    const child = document.createElement('div');
-    child.style.width = width;
-    child.style.height = height;
-    child.style.backgroundColor = getRandomColor(); // Random color
-    child.style.border = '2px solid black'; // Add a border for visibility
-    child.style.display = 'flex';
-    child.style.justifyContent = 'center';
-    child.style.alignItems = 'center';
-    //child.textContent = 'Child'; // Add some text
 
-    // Position the child absolutely within the parent
-    child.style.position = 'absolute';
-    child.style.top = verPos; // Position at half the height of the parent
-    child.style.left = horPos; // Position at half the width of the parent
-    child.style.transform = anchorPoint; // Center the child
-
-    // Append the child to the parent
-    parent.appendChild(child);
-    return child;
-}
-
-let validImages = [];
-
-
-function loadAllImages(imageUrls, callback) {
-    // Create an array of Promises for each image
-    const imagePromises = imageUrls.map(url => checkIfImgExists(url));
-
-    // Wait for all Promises to resolve
-    Promise.all(imagePromises).then(images => {
-        // Filter out null values (failed images)
-        const loadedImages = images.filter(img => img !== null);
-        // Execute the callback with the loaded images
-        callback(loadedImages);
-    });
-}
-function checkIfImgExists(url) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            validImages.push(url); // Push the URL to validImages
-            resolve(true); // Resolve with true (image loaded)
-        };
-        img.onerror = () => resolve(false); // Resolve with false (image failed to load)
-        img.src = url;
-    });
-}
-
-function assignImageToDiv(imagePath, divElement) {
-    const img = new Image();
-    img.src = imagePath;
-    img.onload = () => {
-        divElement.innerHTML = ''; // Clear the div
-        divElement.appendChild(img); // Add the image to the div
-    };
-    img.onerror = () => {
-        console.error('Failed to load image:', imagePath);
-        divElement.textContent = 'Image failed to load'; // Error message
-    };
-}
-
-function lerp(start, end, t) {
-    return start + (end - start) * t;
-}
-
-
-function continuousUpdate() {
-    if (carousel != undefined) {
-
-
-        if(!isCarouselAtTop){
-            animations_vector_targets[0] = lerp(animations_vector_targets[0], 0, animation_speed);
-        } else {
-            animations_vector_targets[0] = lerp(animations_vector_targets[0], 100, animation_speed);
+function interpolateAnimations()
+{
+    for (let i = 0; i < 4; i++) 
+    {
+        if (animations_current[i] != animations_targets[i]) 
+        {
+            animations_current[i] = lerp(animations_current[i], animations_targets[i], animation_speed);
+            animations_current[i] = snapToTarget(animations_current[i], animations_targets[i], animation_speed);
         }
-        scrollSnapController = animations_vector_targets[0];
+    }
+}
+
+function carouselTopSnappingAnimation()
+{
+    if(!is_carousel_at_top && animations_targets[0] != 0)
+    {
+        animations_targets[0] = lerp(animations_targets[0], 0, animation_speed);
+        animations_targets[0] = snapToTarget(animations_targets[0], 0, animation_speed);
+    } 
+    else if(is_carousel_at_top && animations_targets[0] != 100)
+    {
+        animations_targets[0] = lerp(animations_targets[0], 100, animation_speed);
+        animations_targets[0] = snapToTarget(animations_targets[0], 100, animation_speed);
+    }
+    scroll_snap_controller = animations_targets[0];
+    carousel.style.transform = 'translate(' + -50 + '%, ' + -(50 + animations_current[0]) + '%)';
+}
+
+carouselSnapshotTransitionAnim = function()
+{
+    carousel_frame_a.style.transform = 'translate(' + -40 + '%, ' + (-50) + '%)';
+    carousel_frame_b.style.transform = 'translate(' + -60 + '%, ' + (-50) + '%)';
+}
 
 
-        for (let i = 0; i < 4; i++) {
-            if (animations_vector_current[i] != animations_vector_targets[i]) {
-
-                console.log(animations_vector_targets[0] + ' ' + animations_vector_current[0]);
-                animations_vector_current[i] = lerp(animations_vector_current[i], animations_vector_targets[i], animation_speed);
-                if (Math.abs(+ Math.abs(animations_vector_targets[i] - animations_vector_current[i]) < 0.01)) {
-                    animations_vector_current[i] = animations_vector_targets[i];
-                }
-            }
-        }
-
-        carousel.style.transform = 'translate(' + -50 + '%, ' + -(50 + animations_vector_current[0]) + '%)';
-        //let carouselRect = carousel.getBoundingClientRect();
-        //console.log(carouselRect.width);
+function continuousUpdate() 
+{
+    interpolateAnimations();
+    if (carousel != undefined) 
+    {
+        carouselTopSnappingAnimation();
+    }
+    if(carousel_frame_a != undefined && carousel_frame_b != undefined)
+    {
+        carouselSnapshotTransitionAnim();
     }
     // Call the function again on the next frame
     requestAnimationFrame(continuousUpdate);
 }
 
-
-function getSafeIndexes(index, length) {
-    if (length <= 0) return [];
-
-    // Normalize index within bounds
-    index = ((index % length) + length) % length;
-    
-    // Compute left and right indexes
-    let left = ((index - 1) % length + length) % length;
-    let right = ((index + 1) % length + length) % length;
-
-    return [index, left, right];
+nextCarouselImage = function()
+{
+    console.log('next');
 }
+
+previousCarouselImage = function()
+{
+    console.log('prev');
+}
+
+
+snapCarouselToTop = function () 
+{
+    animations_targets[0] = 100;
+    scroll_snap_controller = 0;
+    is_carousel_at_top = true;
+}
+snapCarouselToBottom = function () 
+{
+    animations_targets[0] = 0;
+    scroll_snap_controller = 0;
+    is_carousel_at_top = false;
+}
+trySnapping = function (dist) 
+{
+    scroll_snap_controller += dist * 0.05;
+    animations_targets[0] = scroll_snap_controller ;
+    let tenPercentHeight = window.innerWidth * 0.02;
+    if(!is_carousel_at_top && scroll_snap_controller > tenPercentHeight){
+        snapCarouselToTop();
+    }
+    else if(is_carousel_at_top && scroll_snap_controller  < 100 - tenPercentHeight){
+        snapCarouselToBottom();
+    }
+}
+
+arrowKeyPressed = function (key) 
+{
+    if (key == 'ArrowUp' && !is_carousel_at_top) {
+        snapCarouselToTop();
+    }
+    if (key == 'ArrowDown' && is_carousel_at_top) {
+        snapCarouselToBottom();
+    }
+    if (key == 'ArrowLeft' && !is_carousel_at_top) {
+        previousCarouselImage();
+    }
+    if (key == 'ArrowRight' && !is_carousel_at_top) {
+        nextCarouselImage();
+    }
+}
+
+scrolling = function (dx, dy) 
+{
+    if (dy < 1) {
+        trySnapping(dy);
+    }
+    else if (dy > 1) {
+        trySnapping(dy);
+    }
+}
+
+touchStart = function(dx, dy)
+{
+
+}
+
+touchEnd = function(dx, dy)
+{
+    
+}
+
+touching = function (dx, dy) 
+{
+    if (dy < 5) {
+        trySnapping(dy);
+    }
+    else if (dy > 5) {
+        trySnapping(dy);
+    }
+}
+
 // Start the loop
 continuousUpdate();
-let isCarouselAtTop = false;
 // Function to initialize the page
-function mainFunction() {
+function mainFunction() 
+{
     // Reset default styles for body and html
     document.body.style.margin = '0';
     document.body.style.padding = '0';
@@ -462,27 +377,27 @@ function mainFunction() {
     );
 
 
-    const carousel_frame_a = addChildElement(
+    carousel_frame_a = addChildElement(
         carousel,
         '100%', '100%',
         '50%', '50%',
         'translate(-50%, -50%)'
     );
 
-    const carousel_frame_b = addChildElement(
+    carousel_frame_b = addChildElement(
         carousel,
         '100%', '100%',
         '50%', '50%',
         'translate(-50%, -50%)'
     );
-
+/*
     const carousel_frame_c = addChildElement(
         carousel,
         '100%', '100%',
         '50%', '50%',
         'translate(-50%, -50%)'
     );
-    /*
+    
     const carousel_frame_d = addChildElement(
         carousel,
         '20%', '100%',
@@ -494,69 +409,16 @@ function mainFunction() {
 
 
     loadAllImages(imgPaths, loadedImages => {
-        validImages = sortAlphabeticallyCaseInsensitive(validImages);
-        setImageAsTexture(carousel_frame_b, validImages[0]);
-        setImageAsTexture(carousel_frame_a, validImages[validImages.length - 1]);
-        setImageAsTexture(carousel_frame_c, validImages[1]);
+        valid_images = sortAlphabeticallyCaseInsensitive(valid_images);
+        setImageAsTexture(carousel_frame_b, valid_images[0]);
+        setImageAsTexture(carousel_frame_a, valid_images[valid_images.length - 1]);
+        //setImageAsTexture(carousel_frame_c, valid_images[1]);
 
-        continuousUpdate();
+        //continuousUpdate();
     });
 
-    snapToTop = function () {
-        animations_vector_targets[0] = 100;
-        scrollSnapController = 0;
-        isCarouselAtTop = true;
-    }
-    snapToBottom = function () {
-        animations_vector_targets[0] = 0;
-        scrollSnapController = 0;
-        isCarouselAtTop = false;
-    }
 
-    trySnapping = function (dist) {
-        scrollSnapController += dist * 0.05;
-        animations_vector_targets[0] = scrollSnapController ;
-        if(!isCarouselAtTop && scrollSnapController > scrollSnapDistance){
-            snapToTop();
-        }
-        else if(isCarouselAtTop && scrollSnapController  < 100 - scrollSnapDistance){
-            snapToBottom();
-        }
-    }
-
-    arrowKeyPressed = function (key) {
-        if (key == 'ArrowUp' && !isCarouselAtTop) {
-            snapToTop();
-        }
-        if (key == 'ArrowDown' && isCarouselAtTop) {
-            snapToBottom();
-        }
-    }
-
-    scrolling = function (dx, dy) {
-        if (dy < 5) {
-            trySnapping(dy);
-        }
-        else if (dy > 5) {
-            trySnapping(dy);
-        }
-    }
-    touchStart = function(dx, dy)
-    {
-
-    }
-    touchEnd = function(dx, dy)
-    {
-        
-    }
-    touching = function (dx, dy) {
-        if (dy < 5) {
-            trySnapping(dy);
-        }
-        else if (dy > 5) {
-            trySnapping(dy);
-        }
-    }
+    
 
     setupScrollListeners(
         (dx, dy) => scrolling(dx, dy * -1),
