@@ -13,7 +13,7 @@
 
 
 const animation_speed = 0.02;
-const scheduledActions = [];
+const scheduled_actions = [];
 
 let animations_current = [0, 0, 0, 0];
 let animations_targets = [0, 0, 0, 0];
@@ -23,6 +23,9 @@ let valid_images = [];
 let is_carousel_at_top = false;
 let carousel_frame_a;
 let carousel_frame_b;
+let is_at_frame_b = false;
+let is_animating_carousel = false;
+let current_frame_image_index = 0;
 
 
 
@@ -245,16 +248,26 @@ function carouselTopSnappingAnimation()
     carousel.style.transform = 'translate(' + -50 + '%, ' + -(50 + animations_current[0]) + '%)';
 }
 
-carouselSnapshotTransitionAnim = function()
+
+
+function carouselSnapshotTransitionAnim ()
 {
-    carousel_frame_a.style.transform = 'translate(' + -40 + '%, ' + (-50) + '%)';
-    carousel_frame_b.style.transform = 'translate(' + -60 + '%, ' + (-50) + '%)';
+    //carousel_frame_a.style.transform = 'translate(' + -40 + '%, ' + (-50) + '%)';
+    carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[1]) + '%, ' + (-50) + '%)';
+    
+    carousel_frame_b.style.transform = 'translate(' + (-50 + animations_current[2]) + '%, ' + (-50) + '%)';
 }
 
 
 function continuousUpdate() 
-{
+{    
+    while(scheduled_actions.length > 0)
+    {
+        scheduled_actions[0]();
+        scheduled_actions.shift();
+    }
     interpolateAnimations();
+
     if (carousel != undefined) 
     {
         carouselTopSnappingAnimation();
@@ -267,9 +280,71 @@ function continuousUpdate()
     requestAnimationFrame(continuousUpdate);
 }
 
+function teleportAToLeft()
+{
+    animations_current[1] = -100;
+    animations_targets[1] = -100;
+}
+function teleportAToRight()
+{
+    animations_target[1] = 100;
+    animations_current[1] = 100;
+}
+function teleportBToLeft()
+{
+    animations_target[2] = -100;
+    animations_current[2] = -100;
+}
+function teleportBToRight()
+{
+    animations_targets[2] = 100;
+    animations_current[2] = 100;
+}
+function teleportAToCenter()
+{
+    animations_targets[1] = 0;
+    animations_current[1] = 0;
+}
+function teleportBToCenter()
+{
+    animations_targets[2] = 0;
+    animations_current[2] = 0;
+}
+function moveAToLeft()
+{
+    animations_targets[1] = -100;
+}
+function moveAToRight()
+{
+    animations_targets[1] = 100;
+}
+function moveAToCenter()
+{
+    animations_targets[1] = 0;
+}
+function moveBToLeft()
+{
+    animations_targets[2] = -100;
+}
+function moveBToRight()
+{
+    animations_targets[2] = 100;
+}
+function moveBToCenter()
+{
+    animations_targets[2] = -0;
+}
+
+
+
 nextCarouselImage = function()
 {
-    console.log('next');
+    if(!is_at_frame_b && !is_animating_carousel)
+    {
+        is_animating_carousel = true;
+        //scheduled_actions.push(moveAToLeft);
+        scheduled_actions.push(moveBToRight);
+    }
 }
 
 previousCarouselImage = function()
@@ -290,7 +365,7 @@ snapCarouselToBottom = function ()
     scroll_snap_controller = 0;
     is_carousel_at_top = false;
 }
-trySnapping = function (dist) 
+tryScrollSnapping = function (dist) 
 {
     scroll_snap_controller += dist * 0.05;
     animations_targets[0] = scroll_snap_controller ;
@@ -322,10 +397,10 @@ arrowKeyPressed = function (key)
 scrolling = function (dx, dy) 
 {
     if (dy < 1) {
-        trySnapping(dy);
+        tryScrollSnapping(dy);
     }
     else if (dy > 1) {
-        trySnapping(dy);
+        tryScrollSnapping(dy);
     }
 }
 
@@ -342,10 +417,10 @@ touchEnd = function(dx, dy)
 touching = function (dx, dy) 
 {
     if (dy < 5) {
-        trySnapping(dy);
+        tryScrollSnapping(dy);
     }
     else if (dy > 5) {
-        trySnapping(dy);
+        tryScrollSnapping(dy);
     }
 }
 
@@ -407,7 +482,6 @@ function mainFunction()
     const imgPaths = generateImagePaths(100);
 
 
-
     loadAllImages(imgPaths, loadedImages => {
         valid_images = sortAlphabeticallyCaseInsensitive(valid_images);
         setImageAsTexture(carousel_frame_b, valid_images[0]);
@@ -430,6 +504,8 @@ function mainFunction()
 
 
 
+    //scheduled_actions.push(teleportAToLeft);
+    //scheduled_actions.push(teleportBToRight);
     addCarouselArrows(carousel, 50); // Replace 50 with your desired width
 }
 
