@@ -12,7 +12,7 @@
     <script>
 
 
-const animation_speed = 0.03;
+const animation_speed = 0.08;
 //const scheduled_actions = [];
 
 let animations_current = [0, 0, 0, 0];
@@ -43,31 +43,6 @@ function makeClickable(element, inputFunction)
 }
 
 
-
-
-function startUpdateLoop(updateFunction) 
-{
-    let isRunning = true; // Control variable to start/stop the loop
-
-    // Define the loop function
-    function loop(timestamp) {
-        if (!isRunning) return; // Stop the loop if isRunning is false
-
-        // Call the update function
-        updateFunction(timestamp);
-
-        // Request the next frame
-        requestAnimationFrame(loop);
-    }
-
-    // Start the loop
-    requestAnimationFrame(loop);
-
-    // Return a function to stop the loop
-    return () => {
-        isRunning = false;
-    };
-}
 
 
 
@@ -583,9 +558,6 @@ function mainFunction()
         valid_images = sortAlphabeticallyCaseInsensitive(valid_images);
         setImageAsTexture(carousel_frame_b, valid_images[valid_images.length - 1]);
         setImageAsTexture(carousel_frame_a, valid_images[0]);
-        //setImageAsTexture(carousel_frame_c, valid_images[1]);
-
-        //continuousUpdate();
     });
 
 
