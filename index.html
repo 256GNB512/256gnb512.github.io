@@ -12,8 +12,8 @@
     <script>
 
 
-const animation_speed = 0.02;
-const scheduled_actions = [];
+const animation_speed = 0.03;
+//const scheduled_actions = [];
 
 let animations_current = [0, 0, 0, 0];
 let animations_targets = [0, 0, 0, 0];
@@ -249,23 +249,52 @@ function carouselTopSnappingAnimation()
 }
 
 
+function setCurrentHorizontalPositionsForFrameA()
+{
+    carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[1]) + '%, ' + (-50) + '%)';
+}
+function setCurrentHorizontalPositionsForFrameB()
+{
+    carousel_frame_b.style.transform = 'translate(' + (-50 + animations_current[2]) + '%, ' + (-50) + '%)';
+}
 
 function carouselSnapshotTransitionAnim ()
 {
     //carousel_frame_a.style.transform = 'translate(' + -40 + '%, ' + (-50) + '%)';
-    carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[1]) + '%, ' + (-50) + '%)';
+    if(animations_current[1] != animations_targets[1])
+    {
+        setCurrentHorizontalPositionsForFrameA();
+        //carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[1]) + '%, ' + (-50) + '%)';
+    }
+    if(animations_current[2] != animations_targets[2])
+    {
+        setCurrentHorizontalPositionsForFrameB();
+        //carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[2]) + '%, ' + (-50) + '%)';
+    }
+}
+
+function getSafeIndex(index, length) {
+    if (length <= 0) return [];
+
+    // Normalize index within bounds
+    index = ((index % length) + length) % length;
     
-    carousel_frame_b.style.transform = 'translate(' + (-50 + animations_current[2]) + '%, ' + (-50) + '%)';
+    // Compute left and right indexes
+    //let left = ((index - 1) % length + length) % length;
+    //let right = ((index + 1) % length + length) % length;
+
+    return index;
 }
 
 
 function continuousUpdate() 
 {    
-    while(scheduled_actions.length > 0)
+    /*while(scheduled_actions.length > 0)
     {
         scheduled_actions[0]();
         scheduled_actions.shift();
-    }
+    }*/
+    //console.log(animations_current[1]);
     interpolateAnimations();
 
     if (carousel != undefined) 
@@ -284,31 +313,37 @@ function teleportAToLeft()
 {
     animations_current[1] = -100;
     animations_targets[1] = -100;
+    setCurrentHorizontalPositionsForFrameA();
 }
 function teleportAToRight()
 {
-    animations_target[1] = 100;
+    animations_targets[1] = 100;
     animations_current[1] = 100;
+    setCurrentHorizontalPositionsForFrameA();
 }
 function teleportBToLeft()
 {
-    animations_target[2] = -100;
+    animations_targets[2] = -100;
     animations_current[2] = -100;
+    setCurrentHorizontalPositionsForFrameB();
 }
 function teleportBToRight()
 {
     animations_targets[2] = 100;
     animations_current[2] = 100;
+    setCurrentHorizontalPositionsForFrameB();
 }
 function teleportAToCenter()
 {
     animations_targets[1] = 0;
     animations_current[1] = 0;
+    setCurrentHorizontalPositionsForFrameA();
 }
 function teleportBToCenter()
 {
     animations_targets[2] = 0;
     animations_current[2] = 0;
+    setCurrentHorizontalPositionsForFrameB();
 }
 function moveAToLeft()
 {
@@ -337,19 +372,65 @@ function moveBToCenter()
 
 
 
+
 nextCarouselImage = function()
 {
-    if(!is_at_frame_b && !is_animating_carousel)
+    if(!is_at_frame_b)
     {
-        is_animating_carousel = true;
-        //scheduled_actions.push(moveAToLeft);
-        scheduled_actions.push(moveBToRight);
+        //is_animating_carousel = true;
+        //moveAToLeft();
+        teleportBToLeft();
+        moveBToCenter();
+        moveAToRight();
+        current_frame_image_index++;
+        is_at_frame_b = true;
+        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
+        setImageAsTexture(carousel_frame_b, valid_images[current_frame_image_index]);
+        //scheduled_actions.push(moveBToRight);
+    }
+    else if(is_at_frame_b)
+    {
+        //is_animating_carousel = true;
+        //moveAToLeft();
+        teleportAToLeft();
+        moveAToCenter();
+        moveBToRight();
+        current_frame_image_index++;
+        is_at_frame_b = false;
+        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
+        setImageAsTexture(carousel_frame_a, valid_images[current_frame_image_index]);
+        //scheduled_actions.push(moveBToRight);
     }
 }
 
 previousCarouselImage = function()
 {
-    console.log('prev');
+    if(!is_at_frame_b)
+    {
+        //is_animating_carousel = true;
+        //moveAToLeft();
+        teleportBToRight();
+        moveBToCenter();
+        moveAToLeft();
+        current_frame_image_index--;
+        is_at_frame_b = true;
+        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
+        setImageAsTexture(carousel_frame_b, valid_images[current_frame_image_index]);
+        //scheduled_actions.push(moveBToRight);
+    }
+    else if(is_at_frame_b)
+    {
+        //is_animating_carousel = true;
+        //moveAToLeft();
+        teleportAToRight();
+        moveAToCenter();
+        moveBToLeft();
+        current_frame_image_index--;
+        is_at_frame_b = false;
+        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
+        setImageAsTexture(carousel_frame_a, valid_images[current_frame_image_index]);
+        //scheduled_actions.push(moveBToRight);
+    }
 }
 
 
@@ -369,7 +450,7 @@ tryScrollSnapping = function (dist)
 {
     scroll_snap_controller += dist * 0.05;
     animations_targets[0] = scroll_snap_controller ;
-    let tenPercentHeight = window.innerWidth * 0.02;
+    let tenPercentHeight = window.innerHeight * 0.02;
     if(!is_carousel_at_top && scroll_snap_controller > tenPercentHeight){
         snapCarouselToTop();
     }
@@ -394,6 +475,8 @@ arrowKeyPressed = function (key)
     }
 }
 
+let horizontal_touch_controller = 0;
+
 scrolling = function (dx, dy) 
 {
     if (dy < 1) {
@@ -406,13 +489,22 @@ scrolling = function (dx, dy)
 
 touchStart = function(dx, dy)
 {
-
+    horizontal_touch_controller = 0;
 }
 
 touchEnd = function(dx, dy)
 {
     
 }
+
+function tryHorizontalDragging()
+{
+    if(is_at_frame_b)
+    {
+        animations_targets[2] = horizontal_touch_controller; 
+    }
+}
+
 
 touching = function (dx, dy) 
 {
@@ -421,6 +513,11 @@ touching = function (dx, dy)
     }
     else if (dy > 5) {
         tryScrollSnapping(dy);
+    }
+    if(Math.abs(dx) >= 1 && !is_carousel_at_top)
+    {
+        horizontal_touch_controller += dx;
+        tryHorizontalDragging();
     }
 }
 
@@ -484,8 +581,8 @@ function mainFunction()
 
     loadAllImages(imgPaths, loadedImages => {
         valid_images = sortAlphabeticallyCaseInsensitive(valid_images);
-        setImageAsTexture(carousel_frame_b, valid_images[0]);
-        setImageAsTexture(carousel_frame_a, valid_images[valid_images.length - 1]);
+        setImageAsTexture(carousel_frame_b, valid_images[valid_images.length - 1]);
+        setImageAsTexture(carousel_frame_a, valid_images[0]);
         //setImageAsTexture(carousel_frame_c, valid_images[1]);
 
         //continuousUpdate();
@@ -503,7 +600,7 @@ function mainFunction()
     );
 
 
-
+    teleportBToRight();
     //scheduled_actions.push(teleportAToLeft);
     //scheduled_actions.push(teleportBToRight);
     addCarouselArrows(carousel, 50); // Replace 50 with your desired width
