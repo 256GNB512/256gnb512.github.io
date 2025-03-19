@@ -27,11 +27,6 @@ function lerp(start, end, t) {
     return start + (end - start) * t;
 }
 
-function snapToTarget(num, target, snapRange) {
-    return Math.abs(num - target) <= snapRange ? target : num;
-}
-
-
 function sortAlphabeticallyCaseInsensitive(arr) {
     return arr.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 }

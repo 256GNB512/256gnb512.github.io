@@ -62,7 +62,7 @@ function makeClickable(element, inputFunction)
 function addArrowSkipperGraphic(parentDiv, imagePath, isLeftArrow = true) 
 {
     // Ensure the parent div is positioned and has overflow hidden
-    parentDiv.style.position = 'relative';
+    //parentDiv.style.position = 'relative';
     parentDiv.style.overflow = 'hidden';
 
     // Create a pseudo-element for the flipped image
@@ -80,6 +80,7 @@ function addArrowSkipperGraphic(parentDiv, imagePath, isLeftArrow = true)
     }
     else
     {
+        pseudoElement.style.transform = 'scaleX(1)'; // Flip the image horizontally
         //pseudoElement.style.transform = 'translate(10px,0)'; // Flip the image horizontally
     }
     pseudoElement.style.zIndex = '-1'; // Place it behind the content
@@ -206,7 +207,7 @@ function createMainWindow(height, width)
     container.style.backgroundColor = getRandomColor(); // Random color
     container.style.fontFamily = 'Arial, sans-serif';
     container.style.boxSizing = 'border-box'; // Ensure padding/borders don't affect dimensions
-    container.style.position = 'relative'; // Make the container a positioning context
+    container.style.position = 'absolute'; // Make the container a positioning context
 
     designateIdToDom(container, 'mainWindow');
 
@@ -214,62 +215,6 @@ function createMainWindow(height, width)
     // Return the container (without text)
     return container;
 }
-
-
-// Function to add a 100x100 pixel child element to a parent DOM object
-
-/*function interpolateAnimations()
-{
-    for (let i = 0; i < 4; i++) 
-    {
-        if (animations_current[i] != animations_targets[i]) 
-        {
-            animations_current[i] = lerp(animations_current[i], animations_targets[i], base_anim_duration);
-            animations_current[i] = snapToTarget(animations_current[i], animations_targets[i], base_anim_duration);
-        }
-    }
-}
-
-function carouselTopSnappingAnimation()
-{
-    if(!is_carousel_at_top && animations_targets[0] != 0)
-    {
-        animations_targets[0] = lerp(animations_targets[0], 0, base_anim_duration);
-        animations_targets[0] = snapToTarget(animations_targets[0], 0, base_anim_duration);
-    } 
-    else if(is_carousel_at_top && animations_targets[0] != 100)
-    {
-        animations_targets[0] = lerp(animations_targets[0], 100, base_anim_duration);
-        animations_targets[0] = snapToTarget(animations_targets[0], 100, base_anim_duration);
-    }
-    scroll_snap_controller = animations_targets[0];
-    carousel.style.transform = 'translate(' + -50 + '%, ' + -(50 + animations_current[0]) + '%)';
-}*/
-
-
-/*function setCurrentHorizontalPositionsForFrameA()
-{
-    carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[1]) + '%, ' + (-50) + '%)';
-}
-function setCurrentHorizontalPositionsForFrameB()
-{
-    carousel_frame_b.style.transform = 'translate(' + (-50 + animations_current[2]) + '%, ' + (-50) + '%)';
-}*/
-
-/*function carouselSnapshotTransitionAnim ()
-{
-    //carousel_frame_a.style.transform = 'translate(' + -40 + '%, ' + (-50) + '%)';
-    if(animations_current[1] != animations_targets[1])
-    {
-        setCurrentHorizontalPositionsForFrameA();
-        //carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[1]) + '%, ' + (-50) + '%)';
-    }
-    if(animations_current[2] != animations_targets[2])
-    {
-        setCurrentHorizontalPositionsForFrameB();
-        //carousel_frame_a.style.transform = 'translate(' + (-50 + animations_current[2]) + '%, ' + (-50) + '%)';
-    }
-}*/
 
 function getSafeIndex(index, length) {
     if (length <= 0) return [];
@@ -282,31 +227,6 @@ function getSafeIndex(index, length) {
     //let right = ((index + 1) % length + length) % length;
 
     return index;
-}
-
-
-function continuousUpdate() 
-{    
-    vertical_scroll_accumulator = lerp(vertical_scroll_accumulator, 0, 0.04);
-    /*while(scheduled_actions.length > 0)
-    {
-        scheduled_actions[0]();
-        scheduled_actions.shift();
-    }*/
-    //console.log(animations_current[1]);
-    //interpolateAnimations();
-
-
-    /*if (carousel != undefined) 
-    {
-        //carouselTopSnappingAnimation();
-    }
-    if(carousel_frame_a != undefined && carousel_frame_b != undefined)
-    {
-        //carouselSnapshotTransitionAnim();
-    }*/
-    // Call the function again on the next frame
-    requestAnimationFrame(continuousUpdate);
 }
 
 function teleportAToLeft()
@@ -412,9 +332,9 @@ nextCarouselImage = function()
     {
         is_animating_carousel = true;
         //moveAToLeft();
-        teleportBToLeft();
+        teleportBToRight();
         moveBToCenter();
-        moveAToRight();
+        moveAToLeft();
         current_frame_image_index++;
         is_at_frame_b = true;
         current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
@@ -423,10 +343,10 @@ nextCarouselImage = function()
     else if(is_at_frame_b && !is_animating_carousel)
     {
         is_animating_carousel = true;
-        //moveAToLeft();
-        teleportAToLeft();
+        //moveAToRight();
+        teleportAToRight();
         moveAToCenter();
-        moveBToRight();
+        moveBToLeft();
         current_frame_image_index++;
         is_at_frame_b = false;
         current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
@@ -442,9 +362,9 @@ previousCarouselImage = function()
     {
         is_animating_carousel = true;
         //moveAToLeft();
-        teleportBToRight();
+        teleportBToLeft();
         moveBToCenter();
-        moveAToLeft();
+        moveAToRight();
         current_frame_image_index--;
         is_at_frame_b = true;
         current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
@@ -453,10 +373,10 @@ previousCarouselImage = function()
     else if(is_at_frame_b && !is_animating_carousel)
     {
         is_animating_carousel = true;
-        teleportAToRight();
+        teleportAToLeft();
         moveAToCenter();
         //
-        moveBToLeft();
+        moveBToRight();
         current_frame_image_index--;
         is_at_frame_b = false;
         current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
@@ -472,10 +392,19 @@ snapCarouselToTop = function ()
     {
         return;
     }
-    gsap.to(carousel,  
+    /*gsap.to(carousel,  
     {
         duration: base_anim_duration , // Animation duration
         y: "-150%",
+        ease: selected_easing_method // Easing function
+    });*/
+    gsap.fromTo(carousel, 
+    {
+        y: "-50%", // Start from x: 0
+    }, 
+    {
+        duration: base_anim_duration , // Animation duration
+        y: "-150%", // Move to x: 300
         ease: selected_easing_method // Easing function
     });
     is_carousel_at_top = true;
@@ -483,7 +412,7 @@ snapCarouselToTop = function ()
 snapCarouselToBottom = function () 
 {
     //animations_targets[0] = 0;
-    /*gsap.fromTo(carousel, 
+    gsap.fromTo(carousel, 
     {
         y: "-150%", // Start from x: 0
     }, 
@@ -491,13 +420,13 @@ snapCarouselToBottom = function ()
         duration: base_anim_duration , // Animation duration
         y: "-50%", // Move to x: 300
         ease: selected_easing_method // Easing function
-    });*/
-    gsap.to(carousel,  
+    });
+    /*gsap.to(carousel,  
     {
         duration: base_anim_duration , // Animation duration
         y: "-50%", // Move to x: 300
         ease: selected_easing_method // Easing function
-    });
+    });*/
     is_carousel_at_top = false;
 }
 verticalScrolling = function (dist) 
@@ -646,8 +575,6 @@ function rightClickareaClickAnim()
 
 
 
-continuousUpdate();
-// Function to initialize the page
 function mainFunction() 
 {
     // Reset default styles for body and html
