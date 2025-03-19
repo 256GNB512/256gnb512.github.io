@@ -79,7 +79,7 @@ function addCenteredSquare(parentDiv, squareWidth, invertHorizontally) {
     //[mjtgbvsquare.style.backgroundColor = 'purple'; // Just for visibility
     square.style.position = 'absolute'; // Position absolutely within the parent
     square.style.top = '50%'; // Position from the top
-    square.style.left = '0%'; // Position from the left
+    square.style.left = '25%'; // Position from the left
     square.style.transform = 'translate(0%, -50%)'; // Center the square
     square.style.transformOrigin = 'center center'; // Ensure proper centering
 
@@ -92,6 +92,16 @@ function addCenteredSquare(parentDiv, squareWidth, invertHorizontally) {
     return square;
 }
 
+
+function addSimpleChildElement(parent)
+{
+    return addChildElement(
+        parent,
+        '100%', '100%',
+        '50%', '50%',
+        'translate(-50%, -50%)'
+    );
+}
 function addChildElement(parent,
     width,
     height,
@@ -103,7 +113,7 @@ function addChildElement(parent,
     child.style.width = width;
     child.style.height = height;
     child.style.backgroundColor = getRandomColor(); // Random color
-    child.style.border = '2px solid black'; // Add a border for visibility
+    //child.style.border = '1px solid black'; // Add a border for visibility
     child.style.display = 'flex';
     child.style.justifyContent = 'center';
     child.style.alignItems = 'center';

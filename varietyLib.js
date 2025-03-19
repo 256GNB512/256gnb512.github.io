@@ -18,7 +18,7 @@ function loadImage(path) {
 function generateImagePaths(length) {
     const paths = [];
     for (let i = 0; i < length; i++) {
-        paths.push('imgs/' + `img (${String(i)}).jpg`);
+        paths.push('imgs/' + `img (${String(i)}).jpeg`);
     }
     return paths;
 }
