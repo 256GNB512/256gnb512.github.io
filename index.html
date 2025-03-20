@@ -1,612 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centered Div with Absolute Child</title>
-
-    <script src="divsLib.js"></script>
-    <script src="varietyLib.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
+    <meta name="description" content="A simple Hello World page with proper SEO optimizations.">
+    <meta name="keywords" content="hello world, SEO, basic HTML">
+    <meta name="author" content="Your Name">
+    <title>Hello World</title>
+    <link rel="canonical" href="https://www.yourwebsite.com/">
+    <meta property="og:title" content="Hello World">
+    <meta property="og:description" content="A simple Hello World page with proper SEO optimizations.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.yourwebsite.com/">
+    <meta property="og:image" content="https://www.yourwebsite.com/preview.jpg">
+    <meta name="robots" content="index, follow">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 50px;
+        }
+        .carousel {
+            position: fixed; /* Stays on top even when scrolling */
+            background-color: #0a0a0a;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            z-index: 1000; /* Ensures it appears above everything */
+        }
+        .carousel-a, .carousel-b {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-a {
+            background-color: rgba(255, 0, 0, 1); /* Semi-transparent red */
+            height: : 100%;
+            /*top: 0%;*/
+            z-index: 1;
+        }
+        .carousel-b {
+            background-color: rgba(0, 0, 255, 1); /* Semi-transparent blue */
+            /*top:50%;*/
+            height: 100%;
+            z-index: 2;
+        }
+    </style>
 </head>
+<body>
+    <div class="carousel">
+        <div class="carousel-a">Carousel A</div>
+        <div class="carousel-b">Carousel B</div>
+    </div>
+    <h1>Hello, World!</h1>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
 
+    let is_carousel_at_top = false;
+    let is_at_frame_b = false;
+    let vertical_scroll_accumulator = 0;
+    const animation_length_in_secs = 1.22;
+    const vertical_scroll_discrepancy = 240;
+    let current_frame_image_index = 0;
 
-const base_anim_duration = 2.6;
-//const scheduled_actions = [];
+    function getDomObjectByClassName(className) {
+      return document.querySelector(`.${className}`);
+    }
 
-/*let animations_current;
-{
-    animations_current = [0, 0, 0, 0];
-}
-let animations_targets;
-{
-    animations_targets = [0, 0, 0, 0];
-}*/
-let carousel;
-let vertical_scroll_accumulator = 0;
-const vertical_scroll_discrepancy = 240;
-const selected_easing_method = "power2.inOut";
-let valid_images = [];
-let is_carousel_at_top = false;
-let carousel_frame_a;
-let carousel_frame_b;
-let is_at_frame_b = false;
-let is_animating_carousel = false;
-let current_frame_image_index = 0;
-let carousel_left_clickarea;
-let carousel_right_cilckarea;
+    nextCarouselImage = function()
+    {
+        current_frame_image_index = getSafeIndex(current_frame_image_index + 1);
+        if(!is_at_frame_b)
+        {
+
+        }
+        else if(is_at_frame_b)
+        {
+        }
+
+    }
+
+    previousCarouselImage = function()
+    {
+        current_frame_image_index = getSafeIndex(current_frame_image_index - 1);
+        if(!is_at_frame_b)
+        {
+        }
+        else if(is_at_frame_b )
+        {
+        }
+
+    }
+
+    function getSafeIndex(index, length) {
+        if (length <= 0) return [];
+        index = ((index % length) + length) % length;
+        return index;
+    }
+    snapCarouselToTop = function () 
+    {
+        if(is_carousel_at_top)
+        {
+            return;
+        }
+        const element = getDomObjectByClassName('carousel');
+        gsap.to(element, {
+                duration: animation_length_in_secs,
+                //x: "+=200px", // Move 200px to the right
+                y: "-100%", // Move up by 50% of the element's height
+                ease: "power1.inOut"
+            });
+        is_carousel_at_top = true;
+    }
+    snapCarouselToBottom = function () 
+    {
+        if(!is_carousel_at_top)
+        {
+            return;
+        }
+        const element = getDomObjectByClassName('carousel');
+        gsap.to(element, {
+                duration: animation_length_in_secs,
+                //x: "+=200px", // Move 200px to the right
+                y: "0%", // Move up by 50% of the element's height
+                ease: "power1.inOut"
+            });
+        is_carousel_at_top = false;
+    }
+
+    verticalScrolling = function (dist) 
+    {
+        vertical_scroll_accumulator += dist;
+        if(vertical_scroll_accumulator > vertical_scroll_discrepancy && !is_carousel_at_top)
+        {
+            snapCarouselToTop();
+        }
+        else if(vertical_scroll_accumulator < vertical_scroll_discrepancy && is_carousel_at_top)
+        {
+            snapCarouselToBottom();
+        }
+
+    }
+
+    arrowKeyPressed = function (key) 
+    {
+        if (key == 'ArrowUp' && !is_carousel_at_top) {
+            snapCarouselToTop();
+        }
+        if (key == 'ArrowDown' && is_carousel_at_top) {
+            snapCarouselToBottom();
+        }
+        if (key == 'ArrowLeft' && !is_carousel_at_top) {
+            previousCarouselImage();
+        }
+        if (key == 'ArrowRight' && !is_carousel_at_top) {
+            nextCarouselImage();
+        }
+    }
+
+    let horizontal_touch_controller = 0;
+
+    scrolling = function (dx, dy) 
+    {
+        verticalScrolling(dy);
+    }
+
+    touchStart = function(dx, dy)
+    {
+        horizontal_touch_controller = 0;
+    }
+
+    touchEnd = function(dx, dy)
+    {
+        vertical_scroll_accumulator = 0;
+    }
+
+    function tryHorizontalDragging()
+    {
+        if(is_at_frame_b)
+        {
+            //animations_targets[2] = horizontal_touch_controller; 
+        }
+    }
 
 
+    touching = function (dx, dy) 
+    {
+        verticalScrolling(dy);
+    }
 
-
-function makeClickable(element, inputFunction) 
-{
-    if (element instanceof HTMLElement) {
-        element.addEventListener("click", () => {
-            inputFunction();
-            //console.log("Element " + element.id + " clicked!");
+    function setupScrollListeners(
+        onWheel = () => { },
+        onArrowKey = () => { },
+        onTouchMove = () => { },
+        onTouchStart = () => { },
+        onTouchEnd = () => { }
+    ) 
+    {
+        document.addEventListener('wheel', (event) => {
+            onWheel(event.deltaX, event.deltaY);
         });
-    } else {
-        console.error("Provided argument is not a valid DOM element.");
-    }
-}
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (event) => {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+            onTouchStart(touchStartX, touchStartY);
+        });
+
+        document.addEventListener('touchmove', (event) => {
+            let touchEndX = event.touches[0].clientX;
+            let touchEndY = event.touches[0].clientY;
+            let deltaX = touchStartX - touchEndX;
+            let deltaY = touchStartY - touchEndY;
+            onTouchMove(deltaX, deltaY);
+        });
+
+        document.addEventListener('touchend', (event) => {
+            let touchEndX = event.touches[0].clientX;
+            let touchEndY = event.touches[0].clientY;
+            let deltaX = touchStartX - touchEndX;
+            let deltaY = touchStartY - touchEndY;
+            onTouchEnd(deltaX, deltaY);
+        });
 
 
-
-
-
-
-function addArrowSkipperGraphic(parentDiv, imagePath, isLeftArrow = true) 
-{
-    // Ensure the parent div is positioned and has overflow hidden
-    //parentDiv.style.position = 'relative';
-    parentDiv.style.overflow = 'hidden';
-
-    // Create a pseudo-element for the flipped image
-    const pseudoElement = document.createElement('div');
-    pseudoElement.style.content = '""';
-    pseudoElement.style.position = 'absolute';
-    pseudoElement.style.width = '100%';
-    pseudoElement.style.height = '100%';
-    pseudoElement.style.backgroundImage = `url('${imagePath}')`; // Set the image from the input path
-    pseudoElement.style.backgroundSize = 'cover'; // Ensure the image covers the pseudo-element
-
-    if (isLeftArrow) {
-
-        pseudoElement.style.transform = 'scaleX(-1)'; // Flip the image horizontally
-    }
-    else
-    {
-        pseudoElement.style.transform = 'scaleX(1)'; // Flip the image horizontally
-        //pseudoElement.style.transform = 'translate(10px,0)'; // Flip the image horizontally
-    }
-    pseudoElement.style.zIndex = '-1'; // Place it behind the content
-
-    // Append the pseudo-element to the parent div
-    parentDiv.appendChild(pseudoElement);
-    return pseudoElement;
-}
-
-function setupScrollListeners(
-    onWheel = () => { },
-    onArrowKey = () => { },
-    onTouchMove = () => { },
-    onTouchStart = () => { },
-    onTouchEnd = () => { }
-) 
-{
-    document.addEventListener('wheel', (event) => {
-        onWheel(event.deltaX, event.deltaY);
-    });
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener('touchstart', (event) => {
-        touchStartX = event.touches[0].clientX;
-        touchStartY = event.touches[0].clientY;
-        onTouchStart(touchStartX, touchStartY);
-    });
-
-    document.addEventListener('touchmove', (event) => {
-        let touchEndX = event.touches[0].clientX;
-        let touchEndY = event.touches[0].clientY;
-        let deltaX = touchStartX - touchEndX;
-        let deltaY = touchStartY - touchEndY;
-        onTouchMove(deltaX, deltaY);
-    });
-
-    document.addEventListener('touchend', (event) => {
-        let touchEndX = event.touches[0].clientX;
-        let touchEndY = event.touches[0].clientY;
-        let deltaX = touchStartX - touchEndX;
-        let deltaY = touchStartY - touchEndY;
-        onTouchEnd(deltaX, deltaY);
-    });
-
-
-    document.addEventListener('keydown', (event) => {
-        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
-            onArrowKey(event.key);
-        }
-    });
-}
-
-let left_arrow;
-let right_arrow;
-
-function addCarouselArrows(parentDiv, inputWidth) 
-{
-    // Ensure the parent div has a defined height
-    if (!parentDiv.style.height) {
-        parentDiv.style.height = '100%'; // Default to full height if not set
+        document.addEventListener('keydown', (event) => {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+                onArrowKey(event.key);
+            }
+        });
     }
 
-    // Create the first rectangle
-    const carouselClickAreaL = document.createElement('div');
-    carouselClickAreaL.style.width = `${inputWidth * 2}px`; // Set width
-    carouselClickAreaL.style.height = '100%'; // Inherit height from parent
-    carouselClickAreaL.style.display = 'inline-block'; // Display rectangles side by side
-    carouselClickAreaL.style.position = 'absolute';
-    carouselClickAreaL.style.left = '0';
-    carouselClickAreaL.style.top = '50%';
-    carouselClickAreaL.style.transform = 'translateY(-50%)';
-    carouselClickAreaL.style.transformOrigin = '0 50%'; // Anchor point at (0, 0.5)
-    designateTagToDom(carouselClickAreaL, "carouselBtnL");
 
-    const newSquare1 = addCenteredSquare(carouselClickAreaL, inputWidth, true);
-    left_arrow = addArrowSkipperGraphic(newSquare1, "arrow.png");
-    designateIdToDom(carouselClickAreaL, 'carouselClickAreaL');
-    designateIdToDom(left_arrow, 'carouselLftArrow');
-
-    // Create the second rectangle
-    const carouselClickAreaR = document.createElement('div');
-    carouselClickAreaR.style.width = `${inputWidth * 2}px`; // Set width
-    carouselClickAreaR.style.height = '100%'; // Inherit height from parent
-    carouselClickAreaR.style.display = 'inline-block'; // Display rectangles side by side
-    carouselClickAreaR.style.position = 'absolute';
-    carouselClickAreaR.style.right = '0';
-    carouselClickAreaR.style.top = '50%';
-    carouselClickAreaR.style.transform = 'translateY(-50%)';
-    carouselClickAreaR.style.transformOrigin = '100% 50%'; // Anchor point at (1, 0.5)
-    designateTagToDom(carouselClickAreaR, "carouselBtnR");
-    const newSquare2 = addCenteredSquare(carouselClickAreaR, inputWidth, false);
-    right_arrow = addArrowSkipperGraphic(newSquare2, "arrow.png", false);
-    designateIdToDom(carouselClickAreaR, 'carouselClickAreaR');
-    designateIdToDom(right_arrow, 'carouselRgtArrow');
-
-
-
-
-    makeClickable(carouselClickAreaL, previousCarouselImage);
-    makeClickable(carouselClickAreaR, nextCarouselImage);
-
-    // Append the rectangles to the parent div
-    parentDiv.appendChild(carouselClickAreaL);
-    parentDiv.appendChild(carouselClickAreaR);
-
-
-    carousel_left_clickarea = addSimpleChildElement(carouselClickAreaL);
-    carousel_left_clickarea.style.background = "linear-gradient(to right, rgba(255, 255, 255, 1), rgba(0, 0, 0, 0))";
-    carousel_right_clickarea = addSimpleChildElement(carouselClickAreaR);
-    carousel_right_clickarea.style.background = "linear-gradient(to right, rgba(0, 0, 0, 0), rgba(255, 255, 255, 1))";
-}
-// Function to create a centered container
-function createMainWindow(height, width) 
-{
-    // Create the container
-    const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.justifyContent = 'center';
-    container.style.alignItems = 'center';
-    container.style.height = height;
-    container.style.width = width;
-    container.style.backgroundColor = getRandomColor(); // Random color
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.boxSizing = 'border-box'; // Ensure padding/borders don't affect dimensions
-    container.style.position = 'absolute'; // Make the container a positioning context
-
-    designateIdToDom(container, 'mainWindow');
-
-
-    // Return the container (without text)
-    return container;
-}
-
-function getSafeIndex(index, length) {
-    if (length <= 0) return [];
-
-    // Normalize index within bounds
-    index = ((index % length) + length) % length;
-    
-    // Compute left and right indexes
-    //let left = ((index - 1) % length + length) % length;
-    //let right = ((index + 1) % length + length) % length;
-
-    return index;
-}
-
-function teleportAToLeft()
-{
-    gsap.set(carousel_frame_a, { x: '-100%'});
-}
-function teleportAToRight()
-{
-    gsap.set(carousel_frame_a, { x: '100%'});
-}
-function teleportBToLeft()
-{
-    gsap.set(carousel_frame_b, { x: '-100%'});
-}
-function teleportBToRight()
-{
-    gsap.set(carousel_frame_b, { x: '100%'});
-}
-function teleportAToCenter()
-{
-    gsap.set(carousel_frame_a, { x: '0%'});
-}
-function teleportBToCenter()
-{
-    gsap.set(carousel_frame_a, { x: '0%'});
-}
-function moveAToLeft()
-{
-    gsap.to(carousel_frame_a,  
-    {
-        duration: base_anim_duration , // Animation duration
-        x: "-100%", // Move to x: 300
-        ease: selected_easing_method // Easing function
-    });
-}
-function moveAToRight()
-{
-    gsap.to(carousel_frame_a,  
-    {
-        duration: base_anim_duration , // Animation duration
-        x: "100%", // Move to x: 300
-        ease: selected_easing_method // Easing function
-    });
-}
-function moveAToCenter()
-{
-    gsap.to(carousel_frame_a,  
-    {
-        duration: base_anim_duration , // Animation duration
-        x: "0%", // Move to x: 300
-        ease: selected_easing_method, 
-        onComplete: () => 
-        {
-            is_animating_carousel = false;
-        }
-    });
-}
-function moveBToLeft()
-{
-    gsap.to(carousel_frame_b,  
-    {
-        duration: base_anim_duration , // Animation duration
-        x: "-100%", // Move to x: 300
-        ease: selected_easing_method, 
-        onComplete: () => 
-        {
-            is_animating_carousel = false;
-        }
-    });
-}
-function moveBToRight()
-{
-    gsap.to(carousel_frame_b,  
-    {
-        duration: base_anim_duration , // Animation duration
-        x: "100%", // Move to x: 300
-        ease: selected_easing_method, 
-        onComplete: () => 
-        {
-            is_animating_carousel = false;
-        }
-    });
-}
-function moveBToCenter()
-{
-    gsap.to(carousel_frame_b,  
-    {
-        duration: base_anim_duration , // Animation duration
-        x: "-0%", // Move to x: 300
-        ease: selected_easing_method, 
-        onComplete: () => 
-        {
-            is_animating_carousel = false;
-        }
-    });
-}
-
-
-nextCarouselImage = function()
-{
-    rightClickareaClickAnim();
-    if(!is_at_frame_b && !is_animating_carousel)
-    {
-        is_animating_carousel = true;
-        //moveAToLeft();
-        teleportBToRight();
-        moveBToCenter();
-        moveAToLeft();
-        current_frame_image_index++;
-        is_at_frame_b = true;
-        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
-        setImageAsTexture(carousel_frame_b, valid_images[current_frame_image_index]);
-    }
-    else if(is_at_frame_b && !is_animating_carousel)
-    {
-        is_animating_carousel = true;
-        //moveAToRight();
-        teleportAToRight();
-        moveAToCenter();
-        moveBToLeft();
-        current_frame_image_index++;
-        is_at_frame_b = false;
-        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
-        setImageAsTexture(carousel_frame_a, valid_images[current_frame_image_index]);
-    }
-
-}
-
-previousCarouselImage = function()
-{
-    leftClickareaClickAnim();
-    if(!is_at_frame_b &&!is_animating_carousel)
-    {
-        is_animating_carousel = true;
-        //moveAToLeft();
-        teleportBToLeft();
-        moveBToCenter();
-        moveAToRight();
-        current_frame_image_index--;
-        is_at_frame_b = true;
-        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
-        setImageAsTexture(carousel_frame_b, valid_images[current_frame_image_index]);
-    }
-    else if(is_at_frame_b && !is_animating_carousel)
-    {
-        is_animating_carousel = true;
-        teleportAToLeft();
-        moveAToCenter();
-        //
-        moveBToRight();
-        current_frame_image_index--;
-        is_at_frame_b = false;
-        current_frame_image_index = getSafeIndex(current_frame_image_index, valid_images.length);
-        setImageAsTexture(carousel_frame_a, valid_images[current_frame_image_index]);
-    }
-
-}
-
-
-snapCarouselToTop = function () 
-{
-    if(is_carousel_at_top)
-    {
-        return;
-    }
-    /*gsap.to(carousel,  
-    {
-        duration: base_anim_duration , // Animation duration
-        y: "-150%",
-        ease: selected_easing_method // Easing function
-    });*/
-    gsap.fromTo(carousel, 
-    {
-        y: "-50%", // Start from x: 0
-    }, 
-    {
-        duration: base_anim_duration , // Animation duration
-        y: "-150%", // Move to x: 300
-        ease: selected_easing_method // Easing function
-    });
-    is_carousel_at_top = true;
-}
-snapCarouselToBottom = function () 
-{
-    //animations_targets[0] = 0;
-    gsap.fromTo(carousel, 
-    {
-        y: "-150%", // Start from x: 0
-    }, 
-    {
-        duration: base_anim_duration , // Animation duration
-        y: "-50%", // Move to x: 300
-        ease: selected_easing_method // Easing function
-    });
-    /*gsap.to(carousel,  
-    {
-        duration: base_anim_duration , // Animation duration
-        y: "-50%", // Move to x: 300
-        ease: selected_easing_method // Easing function
-    });*/
-    is_carousel_at_top = false;
-}
-verticalScrolling = function (dist) 
-{
-    vertical_scroll_accumulator += dist;
-    if(vertical_scroll_accumulator > vertical_scroll_discrepancy && !is_carousel_at_top)
-    {
-        snapCarouselToTop();
-    }
-    else if(vertical_scroll_accumulator < vertical_scroll_discrepancy && is_carousel_at_top)
-    {
-        snapCarouselToBottom();
-    }
-
-}
-
-arrowKeyPressed = function (key) 
-{
-    if (key == 'ArrowUp' && !is_carousel_at_top) {
-        snapCarouselToTop();
-    }
-    if (key == 'ArrowDown' && is_carousel_at_top) {
-        snapCarouselToBottom();
-    }
-    if (key == 'ArrowLeft' && !is_carousel_at_top) {
-        previousCarouselImage();
-    }
-    if (key == 'ArrowRight' && !is_carousel_at_top) {
-        nextCarouselImage();
-    }
-}
-
-let horizontal_touch_controller = 0;
-
-scrolling = function (dx, dy) 
-{
-    verticalScrolling(dy);
-}
-
-touchStart = function(dx, dy)
-{
-    horizontal_touch_controller = 0;
-}
-
-touchEnd = function(dx, dy)
-{
-    vertical_scroll_accumulator = 0;
-}
-
-function tryHorizontalDragging()
-{
-    if(is_at_frame_b)
-    {
-        //animations_targets[2] = horizontal_touch_controller; 
-    }
-}
-
-
-touching = function (dx, dy) 
-{
-    verticalScrolling(dy);
-}
-
-function hideClickareas()
-{
-    gsap.set(carousel_left_clickarea, { opacity: 0});
-    gsap.set(carousel_right_clickarea, { opacity: 0});
-}
-
-function leftArrowClickAnim()
-{
-    gsap.to(left_arrow,
-    {
-        duration: base_anim_duration * 0.05,
-        opacity: 0,
-        ease: 'linear' , 
-        onComplete: () => 
-        {
-            gsap.to(left_arrow,
-            {
-                duration: base_anim_duration * 0.5,
-                opacity: 1,
-                ease: 'linear'
-            });
-        }
-    });
-}
-function rightArrowClickAnim()
-{
-    gsap.to(right_arrow,
-    {
-        duration: base_anim_duration * 0.05,
-        opacity: 0,
-        ease: 'linear' , 
-        onComplete: () => 
-        {
-            gsap.to(right_arrow,
-            {
-                duration: base_anim_duration * 0.5,
-                opacity: 1,
-                ease: 'linear'
-            });
-        }
-    });
-}
-
-
-function leftClickareaClickAnim()
-{
-    leftArrowClickAnim();
-    gsap.to(carousel_left_clickarea,
-    {
-        duration: base_anim_duration * 0.05,
-        opacity: 1,
-        ease: 'linear' , 
-        onComplete: () => 
-        {
-            gsap.to(carousel_left_clickarea,
-            {
-                duration: base_anim_duration * 0.5,
-                opacity: 0,
-                ease: 'linear'
-            });
-        }
-    });
-}
-function rightClickareaClickAnim()
-{
-    rightArrowClickAnim();
-    gsap.to(carousel_right_clickarea,
-    {
-        duration: base_anim_duration * 0.05,
-        opacity: 1,
-        ease: 'linear' , 
-        onComplete: () => 
-        {
-            gsap.to(carousel_right_clickarea,
-            {
-                duration: base_anim_duration * 0.5,
-                opacity: 0,
-                ease: 'linear'
-            });
-        }
-    });
-}
-
-
-
-function mainFunction() 
-{
-    // Reset default styles for body and html
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    document.body.style.overflow = 'hidden'; // Prevent scrollbars
-    document.documentElement.style.height = '100%'; // Ensure html takes full height
-
-    // Create the centered container
-    const main_window = createMainWindow('100vh', '100vw');
-
-    // Add the container to the body
-    document.body.appendChild(main_window);
-
-
-
-    // Add a 100x100 pixel child element to the centered container
-    carousel = addSimpleChildElement(main_window);
-
-    carousel_frame_a = addSimpleChildElement(carousel);
-    carousel_frame_b = addSimpleChildElement(carousel);
-    const imgPaths = generateImagePaths(100);
-
-
-    loadAllImages(imgPaths, loadedImages => {
-        valid_images = sortAlphabeticallyCaseInsensitive(valid_images);
-        setImageAsTexture(carousel_frame_b, valid_images[valid_images.length - 1]);
-        setImageAsTexture(carousel_frame_a, valid_images[0]);
-    });
-
-
-    
 
     setupScrollListeners(
         (dx, dy) => scrolling(dx, dy * -1),
@@ -615,22 +259,6 @@ function mainFunction()
         (dx, dy) => touchStart(dx, dy),
         (dx, dy) => touchEnd(dx, dy)
     );
-
-    teleportBToLeft();  
-    addCarouselArrows(carousel, 50); // Replace 50 with your desired width
-
-    hideClickareas();
-    leftArrowClickAnim();
-    rightArrowClickAnim();
-    
-}
-
-window.onload = mainFunction;
-
 </script>
-
-<body>
-    <!-- Everything will be created by JavaScript -->
-</body>
 
 </html>
