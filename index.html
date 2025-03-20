@@ -26,6 +26,7 @@
         h1 {
             margin-top: 50px;
         }
+
         .carousel {
             position: fixed; /* Stays on top even when scrolling */
             background-color: #0a0a0a;
@@ -37,6 +38,36 @@
             padding: 10px;
             text-align: center;
             z-index: 1000; /* Ensures it appears above everything */
+            content-visibility: auto;
+        }
+        .carousel-clickareas {
+            /*background-color: rgba(0.2, 0, 0.8, 0.8)*/;
+            z-index: 1001;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            content-visibility: auto;
+
+        }
+        .carousel-lft-btn, .carousel-rgt-btn {
+            z-index: 1002;
+            position: absolute;
+            width: 26%;
+            height: 100%;
+            top: 0;
+            content-visibility: auto;
+        }
+        .carousel-lft-btn {
+            /*background-color: #ff00ff;*/
+            background: linear-gradient(to right, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+            left: 0;
+        }
+        .carousel-rgt-btn {
+            /*background-color: #00ff00;*/
+            background: linear-gradient(to left, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+            right: 0;
         }
         .carousel-a, .carousel-b {
             width: 100%;
@@ -47,23 +78,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            content-visibility: auto;
         }
         .carousel-a {
             background-color: rgba(255, 0, 0, 1); /* Semi-transparent red */
             height: : 100%;
             /*top: 0%;*/
-            z-index: 1;
+            z-index: 2;
         }
         .carousel-b {
             background-color: rgba(0, 0, 255, 1); /* Semi-transparent blue */
             /*top:50%;*/
             height: 100%;
-            z-index: 2;
+            z-index: 1;
         }
+
     </style>
 </head>
 <body>
     <div class="carousel">
+        <div class="carousel-clickareas"></div>
+            <div class="carousel-lft-btn"></div>
+            <div class="carousel-rgt-btn"></div>
         <div class="carousel-a">Carousel A</div>
         <div class="carousel-b">Carousel B</div>
     </div>
@@ -75,23 +111,95 @@
     let is_carousel_at_top = false;
     let is_at_frame_b = false;
     let vertical_scroll_accumulator = 0;
-    const animation_length_in_secs = 1.22;
+    const animation_length_in_secs = 0.86;
     const vertical_scroll_discrepancy = 240;
     let current_frame_image_index = 0;
 
-    function getDomObjectByClassName(className) {
+    function getDomObjectByClassName(className) 
+    {
       return document.querySelector(`.${className}`);
+    }
+
+    function loadImageAsync(file) 
+    {
+      return new Promise((resolve) => {
+        const img = new Image();
+        
+        img.onload = () => {
+          // Check if image has valid dimensions as an extra validation
+          if (img.width > 0 && img.height > 0) {
+            resolve(img);
+          } else {
+            resolve(null);
+          }
+        };
+
+        img.onerror = () => resolve(null);
+        
+        // Start loading the image after setting up event listeners
+        img.src = file;
+      });
+    }
+
+    asynchronouslyLoadImage = function()
+    {
+        loadImageAsync('path/to/image.jpg')
+          .then(image => {
+            if (image) {
+              // Use the image
+            } else {
+              // Handle failure
+            }
+          });
     }
 
     nextCarouselImage = function()
     {
         current_frame_image_index = getSafeIndex(current_frame_image_index + 1);
+        const frame_a = getDomObjectByClassName('carousel-a');
+        const frame_b = getDomObjectByClassName('carousel-b');
         if(!is_at_frame_b)
         {
 
+            gsap.set(frame_b, 
+            {
+                    zIndex: 2,
+                    x: "100%"
+            });
+            gsap.set(frame_a, 
+            {
+                    zIndex: 1
+            });
+            gsap.to(frame_b, 
+            {
+                    duration: animation_length_in_secs,
+                    x: "0%", // Move up by 50% of the element's height
+                    ease: "power1.inOut"
+            });
+
+
+            is_at_frame_b = true;
         }
         else if(is_at_frame_b)
         {
+            gsap.set(frame_a, 
+            {
+                    zIndex: 2,
+                    x: "100%"
+            });
+            gsap.set(frame_b, 
+            {
+                    zIndex: 1
+            });
+            gsap.to(frame_a, 
+            {
+                    duration: animation_length_in_secs,
+                    x: "0%", // Move up by 50% of the element's height
+                    ease: "power1.inOut"
+            });
+
+
+            is_at_frame_b = false;
         }
 
     }
@@ -99,11 +207,50 @@
     previousCarouselImage = function()
     {
         current_frame_image_index = getSafeIndex(current_frame_image_index - 1);
+        const frame_a = getDomObjectByClassName('carousel-a');
+        const frame_b = getDomObjectByClassName('carousel-b');
         if(!is_at_frame_b)
         {
+
+            gsap.set(frame_b, 
+            {
+                    zIndex: 2,
+                    x: "-100%"
+            });
+            gsap.set(frame_a, 
+            {
+                    zIndex: 1
+            });
+            gsap.to(frame_b, 
+            {
+                    duration: animation_length_in_secs,
+                    x: "0%", // Move up by 50% of the element's height
+                    ease: "power1.inOut"
+            });
+
+
+            is_at_frame_b = true;
         }
-        else if(is_at_frame_b )
+        else if(is_at_frame_b)
         {
+            gsap.set(frame_a, 
+            {
+                    zIndex: 2,
+                    x: "-100%"
+            });
+            gsap.set(frame_b, 
+            {
+                    zIndex: 1
+            });
+            gsap.to(frame_a, 
+            {
+                    duration: animation_length_in_secs,
+                    x: "0%", // Move up by 50% of the element's height
+                    ease: "power1.inOut"
+            });
+
+
+            is_at_frame_b = false;
         }
 
     }
@@ -160,11 +307,11 @@
 
     arrowKeyPressed = function (key) 
     {
-        if (key == 'ArrowUp' && !is_carousel_at_top) {
-            snapCarouselToTop();
-        }
-        if (key == 'ArrowDown' && is_carousel_at_top) {
+        if (key == 'ArrowUp' && is_carousel_at_top) {
             snapCarouselToBottom();
+        }
+        if (key == 'ArrowDown' && !is_carousel_at_top) {
+            snapCarouselToTop();
         }
         if (key == 'ArrowLeft' && !is_carousel_at_top) {
             previousCarouselImage();
@@ -203,6 +350,28 @@
     touching = function (dx, dy) 
     {
         verticalScrolling(dy);
+    }
+
+    function clickLeftCarouselBtn()
+    {
+        previousCarouselImage();
+    }    
+    function clickRightCarouselBtn()
+    {
+        nextCarouselImage();
+    }
+    function addCarouselButtonInterations()
+    {
+
+
+        const leftBtn = getDomObjectByClassName('carousel-lft-btn');
+        const rightBtn = getDomObjectByClassName('carousel-rgt-btn');
+
+
+        leftBtn.addEventListener('click', clickLeftCarouselBtn);
+        rightBtn.addEventListener('click', clickRightCarouselBtn);
+
+
     }
 
     function setupScrollListeners(
@@ -252,6 +421,7 @@
 
 
 
+
     setupScrollListeners(
         (dx, dy) => scrolling(dx, dy * -1),
         (key) => arrowKeyPressed(key),
@@ -259,6 +429,7 @@
         (dx, dy) => touchStart(dx, dy),
         (dx, dy) => touchEnd(dx, dy)
     );
+    addCarouselButtonInterations();
 </script>
 
 </html>
